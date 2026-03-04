@@ -1,0 +1,22 @@
+Build a web app called DarkWatch — a prediction market surveillance dashboard that detects potential insider trading on geopolitical events on Polymarket.
+Tech stack: Vite + React frontend, Express backend in server.js that serves the built frontend from the dist folder.
+Use “type”: “module” in package.json. The run command should be “npm run build && npm start”.
+FRONTEND (src/App.jsx):
+The app fetches active markets from Polymarket’s public Gamma API (https://gamma-api.polymarket.com/markets) sorted by 24h volume, up to 500 markets. It filters for geopolitical events using ~80 keywords (war, military, sanctions, tariff, election, president, ceasefire, nuclear, iran, russia, ukraine, china, taiwan, north korea, israel, gaza, opec, oil, nato, troops, missile, coup, treaty, diplomacy, summit, pentagon, kremlin, drone, cyber, hack, espionage, border, territory, assassination, etc).
+Each market gets an “insider score” (1-99) based on anomaly detection:
+	∙	Volume spike vs daily average (>2.5x = high, >5x = critical, up to 30 pts)
+	∙	24h price change (>8¢ = high, >15¢ = critical, up to 20 pts)
+	∙	Trade clustering (5+ trades in 1hr window, 15 pts)
+	∙	Large trades (>5x average size, up to 20 pts)
+	∙	One-sided buy/sell flow (>4:1 ratio, 12 pts)
+	∙	Wide bid-ask spread (>8¢, 5 pts)
+UI design: Dark terminal/intelligence aesthetic (#0a0a14 background). Use JetBrains Mono for data, IBM Plex Sans for body text. Color coding: red (#ff2a2a) for critical scores 80+, orange (#ff8c00) for high 55+, yellow (#ffd000) for moderate 30+, green (#44cc66) for low.
+Header shows “DARKWATCH” with WATCH in orange, plus a LIVE indicator and clock.
+Stats bar: geo markets count, critical alerts, high risk, 24h volume, avg risk score.
+Filterable/sortable market list with score badges, category tags, price, volume, volume spike ratio.
+Clicking a market opens a detail panel showing: score gauge (animated SVG ring), market stats grid, detection flags with severity badges, recent trades from the CLOB API (https://clob.polymarket.com/trades), and a link to the Polymarket page.
+Add a subtle CSS scanline animation overlay for atmosphere.
+BACKEND (server.js):
+Express server serves static files from dist/. Has one POST endpoint /api/analyze that proxies requests to the Anthropic API (https://api.anthropic.com/v1/messages) using the ANTHROPIC_API_KEY secret. It sends market data and detection flags to Claude for an insider trading assessment.
+Add a “Run Claude Analysis” button in the detail panel that calls /api/analyze.
+Do NOT use any database. All data comes from the Polymarket APIs in real time.
