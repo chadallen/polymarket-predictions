@@ -58,6 +58,17 @@
   .text-glow-green {
     text-shadow: 0 0 10px rgba(68, 204, 102, 0.6);
   }
+  .text-glow-blue {
+    text-shadow: 0 0 10px rgba(100, 160, 255, 0.6);
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 
   ::-webkit-scrollbar {
     width: 4px;

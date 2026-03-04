@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { calculateMarketRisk, type MarketRiskProfile } from "@/lib/scoring";
+import { useMemo } from "react";
+import { calculateMarketRisk, type MarketRiskProfile, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
+import { classifyMarket } from "@/lib/categories";
 
 const GEO_KEYWORDS = [
   'war', 'military', 'sanctions', 'tariff', 'election', 'president',
@@ -37,10 +39,16 @@ export interface PolymarketData {
 
 export type DarkWatchMarket = PolymarketData & {
   riskProfile: MarketRiskProfile;
+  categories: string[];
   isMock?: boolean;
 };
 
-function getMockMarkets(): DarkWatchMarket[] {
+interface RawMarket extends PolymarketData {
+  categories: string[];
+  isMock?: boolean;
+}
+
+function getMockRawMarkets(): RawMarket[] {
   const mocks = [
     { q: "Will there be a ceasefire in Ukraine by July 2025?", v: "4500000", v24: "850000" },
     { q: "Will China impose new tariffs on US tech before May?", v: "1200000", v24: "45000" },
@@ -50,32 +58,27 @@ function getMockMarkets(): DarkWatchMarket[] {
     { q: "Who will win the upcoming Presidential Election?", v: "150000000", v24: "2000000" },
   ];
 
-  return mocks.map((m, i) => {
-    const market: PolymarketData = {
-      id: `mock-${i}`,
-      question: m.q,
-      conditionId: `cond-${i}`,
-      slug: m.q.toLowerCase().replace(/\s+/g, '-'),
-      endDate: new Date(Date.now() + 86400000 * 30).toISOString(),
-      volume: m.v,
-      volume24hr: m.v24,
-      outcomes: ["Yes", "No"],
-      outcomePrices: ["0.34", "0.66"],
-      active: true,
-      closed: false,
-    };
-    return {
-      ...market,
-      riskProfile: calculateMarketRisk(market),
-      isMock: true,
-    };
-  });
+  return mocks.map((m, i) => ({
+    id: `mock-${i}`,
+    question: m.q,
+    conditionId: `cond-${i}`,
+    slug: m.q.toLowerCase().replace(/\s+/g, '-'),
+    endDate: new Date(Date.now() + 86400000 * 30).toISOString(),
+    volume: m.v,
+    volume24hr: m.v24,
+    outcomes: ["Yes", "No"],
+    outcomePrices: ["0.34", "0.66"],
+    active: true,
+    closed: false,
+    categories: classifyMarket(m.q),
+    isMock: true,
+  }));
 }
 
-export function useMarkets() {
+function useRawMarkets() {
   return useQuery({
     queryKey: ["markets", "geo-filtered"],
-    queryFn: async () => {
+    queryFn: async (): Promise<RawMarket[]> => {
       try {
         const res = await fetch("/api/markets");
         if (!res.ok) throw new Error("Failed to fetch markets");
@@ -83,7 +86,7 @@ export function useMarkets() {
 
         const geoPattern = new RegExp(`\\b(${GEO_KEYWORDS.join('|')})\\b`, 'i');
 
-        const filtered: DarkWatchMarket[] = data
+        const filtered: RawMarket[] = data
           .filter((m: any) => geoPattern.test(m.question || ''))
           .map((m: any) => {
             let outcomes = m.outcomes;
@@ -92,22 +95,42 @@ export function useMarkets() {
             try { outcomePrices = typeof outcomePrices === 'string' ? JSON.parse(outcomePrices) : outcomePrices; } catch { outcomePrices = []; }
             if (!Array.isArray(outcomes)) outcomes = [];
             if (!Array.isArray(outcomePrices)) outcomePrices = [];
-            const parsed = { ...m, outcomes, outcomePrices };
             return {
-              ...parsed,
-              riskProfile: calculateMarketRisk(parsed),
+              ...m,
+              outcomes,
+              outcomePrices,
+              categories: classifyMarket(m.question || ""),
               isMock: false,
             };
-          })
-          .sort((a: DarkWatchMarket, b: DarkWatchMarket) => b.riskProfile.score - a.riskProfile.score);
+          });
 
-        if (filtered.length === 0) return getMockMarkets().sort((a, b) => b.riskProfile.score - a.riskProfile.score);
+        if (filtered.length === 0) return getMockRawMarkets();
         return filtered;
       } catch (e) {
         console.warn("Falling back to simulated data due to API error", e);
-        return getMockMarkets().sort((a, b) => b.riskProfile.score - a.riskProfile.score);
+        return getMockRawMarkets();
       }
     },
     refetchInterval: 30000,
   });
+}
+
+export function useMarkets(weights: ScoringWeights = DEFAULT_WEIGHTS) {
+  const query = useRawMarkets();
+
+  const scoredMarkets = useMemo(() => {
+    if (!query.data) return undefined;
+
+    return query.data
+      .map((raw): DarkWatchMarket => ({
+        ...raw,
+        riskProfile: calculateMarketRisk(raw, weights),
+      }))
+      .sort((a, b) => b.riskProfile.score - a.riskProfile.score);
+  }, [query.data, weights]);
+
+  return {
+    ...query,
+    data: scoredMarkets,
+  };
 }

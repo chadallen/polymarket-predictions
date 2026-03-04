@@ -4,6 +4,7 @@ import { useTrades } from "@/hooks/use-trades";
 import { useAnalyze } from "@/hooks/use-analyze";
 import { ScoreGauge } from "./ScoreGauge";
 import { formatCurrency, formatCents, cn, getScoreColor, getScoreBg } from "@/lib/utils";
+import { CATEGORIES } from "@/lib/categories";
 import { ChevronDown, ChevronUp, ExternalLink, TrendingUp, Activity, Zap, Terminal } from "lucide-react";
 
 interface FeedCardProps {
@@ -104,6 +105,23 @@ export function FeedCard({ market, rank }: FeedCardProps) {
             {flags.length > 0 && (
               <span className="text-[11px] font-mono-data text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
             )}
+            {market.categories.filter(c => c !== "other").map(catId => {
+              const cat = CATEGORIES.find(c => c.id === catId);
+              if (!cat) return null;
+              return (
+                <span
+                  key={catId}
+                  data-testid={`badge-category-${catId}-${market.id}`}
+                  className="text-[9px] px-1 py-0.5 rounded font-mono-data uppercase tracking-wider border"
+                  style={{
+                    borderColor: `hsl(${cat.color} / 0.2)`,
+                    color: `hsl(${cat.color} / 0.8)`,
+                  }}
+                >
+                  {cat.label}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

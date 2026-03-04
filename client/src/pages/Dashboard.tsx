@@ -1,17 +1,60 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
+import { ScoringButton, ScoringPanelBody } from "@/components/ScoringPanel";
 import { useMarkets } from "@/hooks/use-markets";
 import { formatCurrency } from "@/lib/utils";
+import { CATEGORIES } from "@/lib/categories";
+import { type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { AlertCircle, Search } from "lucide-react";
 
 export default function Dashboard() {
-  const { data: markets, isLoading, isError } = useMarkets();
+  const [weights, setWeights] = useState<ScoringWeights>({ ...DEFAULT_WEIGHTS });
+  const [scoringOpen, setScoringOpen] = useState(false);
+  const { data: markets, isLoading, isError } = useMarkets(weights);
   const [search, setSearch] = useState("");
+  const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
 
-  const filtered = (markets || []).filter(m =>
-    m.question.toLowerCase().includes(search.toLowerCase())
-  );
+  const toggleCategory = (id: string) => {
+    setActiveCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const filtered = useMemo(() => {
+    let result = markets || [];
+
+    if (search) {
+      result = result.filter(m =>
+        m.question.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (activeCategories.size > 0) {
+      result = result.filter(m =>
+        m.categories.some(c => activeCategories.has(c))
+      );
+    }
+
+    return result;
+  }, [markets, search, activeCategories]);
+
+  const categoryCounts = useMemo(() => {
+    const searchFiltered = (markets || []).filter(m =>
+      !search || m.question.toLowerCase().includes(search.toLowerCase())
+    );
+    const counts: Record<string, number> = {};
+    for (const cat of CATEGORIES) {
+      counts[cat.id] = searchFiltered.filter(m => m.categories.includes(cat.id)).length;
+    }
+    return counts;
+  }, [markets, search]);
 
   const critical = filtered.filter(m => m.riskProfile.score >= 80).length;
   const high = filtered.filter(m => m.riskProfile.score >= 55 && m.riskProfile.score < 80).length;
@@ -49,17 +92,65 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="px-3 pb-3">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <input
-                  data-testid="input-search"
-                  type="text"
-                  placeholder="Filter markets..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full bg-card border border-border rounded pl-8 pr-3 py-2 text-sm font-mono-data focus:outline-none focus:border-[hsl(var(--dw-blue))]/40 transition-colors"
+            <div className="px-3 pb-2 space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    data-testid="input-search"
+                    type="text"
+                    placeholder="Filter markets..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="w-full bg-card border border-border rounded pl-8 pr-3 py-2 text-sm font-mono-data focus:outline-none focus:border-[hsl(var(--dw-blue))]/40 transition-colors"
+                  />
+                </div>
+                <ScoringButton
+                  isOpen={scoringOpen}
+                  isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
+                  onToggle={() => setScoringOpen(!scoringOpen)}
                 />
+              </div>
+
+              {scoringOpen && (
+                <ScoringPanelBody weights={weights} onChange={setWeights} />
+              )}
+
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <button
+                  data-testid="button-category-all"
+                  onClick={() => setActiveCategories(new Set())}
+                  className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono-data uppercase tracking-wider border transition-colors ${
+                    activeCategories.size === 0
+                      ? "border-foreground/30 text-foreground bg-foreground/5"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                  }`}
+                >
+                  All
+                  <span className="ml-1 opacity-60">{(markets || []).length}</span>
+                </button>
+                {CATEGORIES.map(cat => {
+                  const count = categoryCounts[cat.id] || 0;
+                  const isActive = activeCategories.has(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      data-testid={`button-category-${cat.id}`}
+                      onClick={() => toggleCategory(cat.id)}
+                      className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono-data uppercase tracking-wider border transition-colors ${
+                        !isActive ? "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20" : ""
+                      }`}
+                      style={isActive ? {
+                        borderColor: `hsl(${cat.color} / 0.4)`,
+                        color: `hsl(${cat.color})`,
+                        backgroundColor: `hsl(${cat.color} / 0.05)`,
+                      } : {}}
+                    >
+                      {cat.label}
+                      <span className="ml-1 opacity-60">{count}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
