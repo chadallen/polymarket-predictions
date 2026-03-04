@@ -25,10 +25,12 @@ export function FeedCard({ market, rank }: FeedCardProps) {
     return market.riskProfile;
   }, [market.riskProfile, trades]);
 
-  const score = enrichedProfile.score;
-  const flags = enrichedProfile.flags;
+  const baseScore = market.riskProfile.score;
+  const baseFlags = market.riskProfile.flags;
+  const detailScore = enrichedProfile.score;
+  const detailFlags = enrichedProfile.flags;
 
-  const severityLabel = score >= 80 ? "CRITICAL" : score >= 55 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
+  const severityLabel = baseScore >= 80 ? "CRITICAL" : baseScore >= 55 ? "HIGH" : baseScore >= 30 ? "MODERATE" : "LOW";
 
   const handleAnalyze = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -36,8 +38,8 @@ export function FeedCard({ market, rank }: FeedCardProps) {
       marketId: market.id,
       title: market.question,
       description: `Market ends: ${market.endDate}. Current volume: ${market.volume}`,
-      score,
-      flags: flags.map(f => ({ name: f.name, severity: f.severity, points: f.points })),
+      score: detailScore,
+      flags: detailFlags.map(f => ({ name: f.name, severity: f.severity, points: f.points })),
       recentTrades: trades?.slice(0, 10).map(t => ({
         price: t.price,
         size: t.size,
@@ -57,8 +59,8 @@ export function FeedCard({ market, rank }: FeedCardProps) {
       data-testid={`feed-card-${market.id}`}
       className={cn(
         "border rounded-md",
-        score >= 80 ? "border-[hsl(var(--dw-red))]/30 bg-[hsl(var(--dw-red))]/[0.03]" :
-        score >= 55 ? "border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.02]" :
+        baseScore >= 80 ? "border-[hsl(var(--dw-red))]/30 bg-[hsl(var(--dw-red))]/[0.03]" :
+        baseScore >= 55 ? "border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.02]" :
         "border-border bg-card/40"
       )}
     >
@@ -72,10 +74,10 @@ export function FeedCard({ market, rank }: FeedCardProps) {
       >
         <div className={cn(
           "w-12 h-12 shrink-0 rounded flex flex-col items-center justify-center border",
-          getScoreBg(score)
+          getScoreBg(baseScore)
         )}>
-          <span className={cn("font-mono-data font-bold text-lg leading-none", getScoreColor(score))}>
-            {score}
+          <span className={cn("font-mono-data font-bold text-lg leading-none", getScoreColor(baseScore))}>
+            {baseScore}
           </span>
         </div>
 
@@ -91,9 +93,9 @@ export function FeedCard({ market, rank }: FeedCardProps) {
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={cn(
               "text-[10px] px-1.5 py-0.5 rounded font-mono-data uppercase tracking-wider",
-              score >= 80 ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
-              score >= 55 ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
-              score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
+              baseScore >= 80 ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
+              baseScore >= 55 ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
+              baseScore >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
               "bg-[hsl(var(--dw-green))]/15 text-[hsl(var(--dw-green))]"
             )}>
               {severityLabel}
@@ -109,8 +111,8 @@ export function FeedCard({ market, rank }: FeedCardProps) {
                 {topOutcome} {formatCents(topPrice)}
               </span>
             )}
-            {flags.length > 0 && (
-              <span className="text-[11px] font-mono-data text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
+            {baseFlags.length > 0 && (
+              <span className="text-[11px] font-mono-data text-muted-foreground">{baseFlags.length} flag{baseFlags.length !== 1 ? 's' : ''}</span>
             )}
           </div>
         </div>
@@ -120,12 +122,12 @@ export function FeedCard({ market, rank }: FeedCardProps) {
         <div className="px-4 pb-4 space-y-4 border-t border-border/50 pt-4">
 
           <div className="flex items-center gap-4">
-            <ScoreGauge score={score} size={80} />
+            <ScoreGauge score={detailScore} size={80} />
             <div className="grid grid-cols-2 gap-2 flex-1">
               <Stat icon={<Activity className="w-3 h-3" />} label="24h Vol" value={formatCurrency(vol24)} />
               <Stat icon={<TrendingUp className="w-3 h-3" />} label="Spike" value={`${market.riskProfile.volumeSpikeRatio.toFixed(1)}x`} />
               <Stat icon={<Activity className="w-3 h-3" />} label="Total Vol" value={formatCurrency(volTotal)} />
-              <Stat icon={<Zap className="w-3 h-3" />} label="Flags" value={`${flags.length}`} />
+              <Stat icon={<Zap className="w-3 h-3" />} label="Flags" value={`${detailFlags.length}`} />
             </div>
           </div>
 
@@ -143,10 +145,10 @@ export function FeedCard({ market, rank }: FeedCardProps) {
             </div>
           )}
 
-          {flags.length > 0 && (
+          {detailFlags.length > 0 && (
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">Detection Flags</span>
-              {flags.map((flag, i) => (
+              {detailFlags.map((flag, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5 px-2.5 rounded bg-background/60 border border-border/50 text-xs font-mono-data">
                   <span className="truncate mr-2">{flag.name}</span>
                   <span className={cn(
