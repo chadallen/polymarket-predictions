@@ -14,10 +14,13 @@ export function Header() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-[hsl(var(--dw-red))]" />
-          <h1 className="text-base font-bold font-mono-data tracking-tight">
-            <span className="text-foreground">DARK</span>
-            <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
-          </h1>
+          <div>
+            <h1 className="text-base font-bold font-mono-data tracking-tight leading-none">
+              <span className="text-foreground">DARK</span>
+              <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
+            </h1>
+            <p className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest leading-none mt-0.5">detecting insider trades on betting markets</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
