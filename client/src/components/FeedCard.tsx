@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { marked } from "marked";
 import { type DarkWatchMarket } from "@/hooks/use-markets";
 import { useTrades } from "@/hooks/use-trades";
 import { useAnalyze } from "@/hooks/use-analyze";
@@ -241,8 +242,9 @@ export function FeedCard({ market, rank }: FeedCardProps) {
               <div className="text-[10px] font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest mb-2 flex items-center gap-1.5">
                 <Terminal className="w-3 h-3" /> Claude Assessment
               </div>
-              <div className="text-xs leading-relaxed text-foreground/85 font-mono-data whitespace-pre-wrap">
-                {analyzeMutation.data.analysis}
+              <div
+                className="text-xs leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                dangerouslySetInnerHTML={{ __html: marked.parse(analyzeMutation.data.analysis, { async: false }) as string }}
               </div>
             </div>
           )}

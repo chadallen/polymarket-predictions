@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import { marked } from "marked";
 import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
 import { ScoringToggle, ScoringPanelBody } from "@/components/ScoringPanel";
@@ -197,9 +198,10 @@ export default function Dashboard() {
                       <X className="w-3 h-3" />
                     </button>
                   </div>
-                  <div className="text-xs leading-relaxed text-foreground/85 font-mono-data whitespace-pre-wrap">
-                    {recommendMutation.data.recommendation}
-                  </div>
+                  <div
+                    className="text-xs leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                    dangerouslySetInnerHTML={{ __html: marked.parse(recommendMutation.data.recommendation, { async: false }) as string }}
+                  />
                 </div>
               )}
 

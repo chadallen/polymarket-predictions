@@ -19,7 +19,7 @@ export function Header() {
               <span className="text-foreground">DARK</span>
               <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
             </h1>
-            <p className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest leading-none mt-0.5">detecting insider trades on betting markets</p>
+            <p className="text-[11px] font-mono-data text-muted-foreground uppercase tracking-widest leading-none mt-0.5">detecting insider trades on betting markets</p>
           </div>
         </div>
 
