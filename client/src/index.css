@@ -6,52 +6,38 @@
 
 @layer base {
   :root {
-    --background: 240 33% 4%; /* #0a0a14 */
+    --background: 240 33% 4%;
     --foreground: 210 40% 98%;
-    
     --card: 240 25% 8%;
     --card-foreground: 210 40% 98%;
-    
     --popover: 240 25% 8%;
     --popover-foreground: 210 40% 98%;
-    
     --primary: 240 5% 65%;
     --primary-foreground: 240 33% 4%;
-    
     --secondary: 240 20% 12%;
     --secondary-foreground: 210 40% 98%;
-    
     --muted: 240 20% 15%;
     --muted-foreground: 240 10% 60%;
-    
     --accent: 240 20% 15%;
     --accent-foreground: 210 40% 98%;
-    
-    --destructive: 0 100% 58%; /* #ff2a2a */
+    --destructive: 0 100% 58%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 240 20% 15%;
     --input: 240 20% 15%;
     --ring: 240 20% 30%;
-
     --radius: 0.25rem;
 
-    /* DarkWatch Specific Terminal Colors */
-    --dw-red: 0 100% 58%;    /* #ff2a2a */
-    --dw-orange: 33 100% 50%; /* #ff8c00 */
-    --dw-yellow: 49 100% 50%; /* #ffd000 */
-    --dw-green: 135 60% 53%;  /* #44cc66 */
-    --dw-blue: 210 100% 65%;  
+    --dw-red: 0 100% 58%;
+    --dw-orange: 33 100% 50%;
+    --dw-yellow: 49 100% 50%;
+    --dw-green: 135 60% 53%;
+    --dw-blue: 210 100% 65%;
   }
 
   body {
-    @apply bg-background text-foreground antialiased overflow-hidden;
+    @apply bg-background text-foreground antialiased;
     font-family: 'IBM Plex Sans', sans-serif;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'JetBrains Mono', monospace;
-    text-transform: uppercase;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -60,11 +46,10 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* Scanline overlay effect */
   .scanlines::before {
     content: " ";
     display: block;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
@@ -72,33 +57,11 @@
     background: linear-gradient(
       to bottom,
       rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.25) 50%
+      rgba(0, 0, 0, 0.15) 50%
     );
     background-size: 100% 4px;
-    z-index: 50;
+    z-index: 9999;
     pointer-events: none;
-  }
-
-  /* Screen flicker/glow */
-  .crt-flicker::after {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
-    opacity: 0.5;
-    z-index: 50;
-    pointer-events: none;
-    animation: flicker 0.15s infinite;
-  }
-
-  @keyframes flicker {
-    0% { opacity: 0.45; }
-    50% { opacity: 0.5; }
-    100% { opacity: 0.45; }
   }
 
   .text-glow-red {
@@ -114,26 +77,14 @@
     text-shadow: 0 0 10px rgba(68, 204, 102, 0.6);
   }
 
-  .box-glow-red {
-    box-shadow: 0 0 15px rgba(255, 42, 42, 0.15), inset 0 0 10px rgba(255, 42, 42, 0.1);
-  }
-  .box-glow-orange {
-    box-shadow: 0 0 15px rgba(255, 140, 0, 0.15), inset 0 0 10px rgba(255, 140, 0, 0.1);
-  }
-
-  /* Custom terminal scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 4px;
   }
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
-    border-left: 1px solid hsl(var(--border));
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--muted));
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+    border-radius: 2px;
   }
 }

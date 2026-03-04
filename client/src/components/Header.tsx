@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 
 export function Header() {
   const [time, setTime] = useState(new Date());
@@ -10,26 +10,24 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-14 border-b border-border bg-background/95 backdrop-blur z-40 flex items-center px-6 justify-between relative shrink-0">
-      <div className="flex items-center gap-3">
-        <ShieldAlert className="w-5 h-5 text-[hsl(var(--dw-red))]" />
-        <h1 className="text-xl font-bold tracking-tight">
-          <span className="text-foreground">DARK</span>
-          <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
-        </h1>
-        <div className="ml-4 px-2 py-0.5 rounded bg-[hsl(var(--dw-red))]/10 border border-[hsl(var(--dw-red))]/30 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[hsl(var(--dw-red))] animate-pulse" />
-          <span className="text-xs font-mono-data text-[hsl(var(--dw-red))] uppercase tracking-wider">Live Intel</span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6 text-sm font-mono-data text-muted-foreground">
+    <header data-testid="header" className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4" />
-          <span>SYS.OP.NORMAL</span>
+          <ShieldAlert className="w-4 h-4 text-[hsl(var(--dw-red))]" />
+          <h1 className="text-base font-bold font-mono-data tracking-tight">
+            <span className="text-foreground">DARK</span>
+            <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
+          </h1>
         </div>
-        <div className="tabular-nums">
-          {time.toISOString().replace('T', ' ').substring(0, 19)} UTC
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[hsl(var(--dw-red))]/10 border border-[hsl(var(--dw-red))]/30">
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--dw-red))] animate-pulse" />
+            <span className="text-[10px] font-mono-data text-[hsl(var(--dw-red))] uppercase tracking-wider">Live</span>
+          </div>
+          <span className="text-[10px] font-mono-data text-muted-foreground tabular-nums hidden sm:block">
+            {time.toISOString().replace('T', ' ').substring(0, 19)}Z
+          </span>
         </div>
       </div>
     </header>

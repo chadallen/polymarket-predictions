@@ -32,13 +32,3 @@ export function getScoreBg(score: number) {
   return "bg-[hsl(var(--dw-green))]/10 border-[hsl(var(--dw-green))]/30";
 }
 
-// Pseudo-random number generator based on a string seed
-export function pseudoRandom(seed: string) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash) / 2147483648;
-}

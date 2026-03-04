@@ -6,19 +6,17 @@ interface ScoreGaugeProps {
   size?: number;
 }
 
-export function ScoreGauge({ score, size = 120 }: ScoreGaugeProps) {
-  const strokeWidth = 8;
+export function ScoreGauge({ score, size = 80 }: ScoreGaugeProps) {
+  const strokeWidth = size < 100 ? 5 : 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (score / 100) * circumference;
-  
   const colorClass = getScoreColor(score);
-  // Extract just the hex/hsl mapping for stroke if possible, but using currentColor with utility classes is easiest.
+  const fontSize = size < 100 ? "text-xl" : "text-4xl";
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
       <svg className="transform -rotate-90 w-full h-full">
-        {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -27,7 +25,6 @@ export function ScoreGauge({ score, size = 120 }: ScoreGaugeProps) {
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Animated score ring */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -39,16 +36,13 @@ export function ScoreGauge({ score, size = 120 }: ScoreGaugeProps) {
           fill="none"
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
           style={{ strokeDasharray: circumference }}
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center">
-        <span className={`text-4xl font-mono-data font-bold ${colorClass}`}>
+        <span className={`${fontSize} font-mono-data font-bold ${colorClass}`}>
           {score}
-        </span>
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono-data">
-          Risk
         </span>
       </div>
     </div>
