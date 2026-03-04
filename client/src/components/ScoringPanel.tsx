@@ -56,8 +56,8 @@ function CompactSlider({
   const isZero = value < 0.05;
 
   return (
-    <div className="flex items-center gap-2.5 lg:gap-3 min-w-0">
-      <span className="font-mono-data text-xs lg:text-sm text-muted-foreground w-[80px] lg:w-[110px] flex-shrink-0 truncate">{label}</span>
+    <div className="flex items-center gap-2.5 lg:gap-4 min-w-0">
+      <span className="font-mono-data text-xs lg:text-base text-muted-foreground w-[80px] lg:w-[130px] flex-shrink-0 truncate">{label}</span>
       <input
         data-testid={`slider-weight-${category}`}
         type="range"
@@ -67,8 +67,8 @@ function CompactSlider({
         value={value}
         onChange={(e) => onChange(Math.round(parseFloat(e.target.value) * 10) / 10)}
         onInput={(e) => onChange(Math.round(parseFloat((e.target as HTMLInputElement).value) * 10) / 10)}
-        className="flex-1 h-7 appearance-none bg-transparent cursor-pointer min-w-0 touch-none
-          [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-full
+        className="flex-1 h-7 lg:h-9 appearance-none bg-transparent cursor-pointer min-w-0 touch-none
+          [&::-webkit-slider-runnable-track]:h-1.5 lg:[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-full
           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7
           [&::-webkit-slider-thumb]:rounded-sm [&::-webkit-slider-thumb]:bg-[hsl(var(--dw-orange))]
           [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background
@@ -83,7 +83,7 @@ function CompactSlider({
       />
       <span
         data-testid={`text-weight-${category}`}
-        className={`font-mono-data text-xs lg:text-sm font-bold tabular-nums w-[32px] lg:w-[40px] text-right flex-shrink-0 ${
+        className={`font-mono-data text-xs lg:text-base font-bold tabular-nums w-[32px] lg:w-[48px] text-right flex-shrink-0 ${
           isZero ? "text-muted-foreground" : isDefault ? "text-foreground" : "text-[hsl(var(--dw-orange))]"
         }`}
       >
@@ -100,15 +100,15 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
     <button
       data-testid="button-adjust-weights"
       onClick={onToggle}
-      className={`flex items-center gap-1.5 font-mono-data text-xs lg:text-sm uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
+      className={`flex items-center gap-1.5 lg:gap-2 font-mono-data text-xs lg:text-base uppercase tracking-wider transition-colors px-4 lg:px-5 py-2 lg:py-3 rounded border ${
         isModified
           ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/5 lg:bg-[hsl(var(--dw-orange))]/25"
           : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20 lg:hover:border-foreground"
       }`}
     >
       Adjust weights
-      {isModified && <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--dw-orange))]" />}
-      <Chevron className="w-3.5 h-3.5" />
+      {isModified && <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-[hsl(var(--dw-orange))]" />}
+      <Chevron className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
     </button>
   );
 }
@@ -123,11 +123,11 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
   return (
     <div
       data-testid="panel-scoring-weights"
-      className="bg-card/80 lg:bg-card border border-border rounded px-3 lg:px-4 py-2 lg:py-3 space-y-1.5 lg:space-y-2"
+      className="bg-card/80 lg:bg-card border border-border rounded px-3 lg:px-5 py-2 lg:py-4 space-y-1.5 lg:space-y-3"
     >
-      <div className="flex items-center justify-between mb-0.5">
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-muted-foreground">
+      <div className="flex items-center justify-between mb-0.5 lg:mb-1">
+        <div className="flex items-center gap-1.5 lg:gap-2">
+          <span className="font-mono-data text-[9px] lg:text-xs uppercase tracking-widest text-muted-foreground">
             Weights
           </span>
           <button
@@ -135,35 +135,35 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
             onClick={() => setHelpOpen(!helpOpen)}
             className={`transition-colors ${helpOpen ? "text-[hsl(var(--dw-blue))]" : "text-muted-foreground hover:text-foreground"}`}
           >
-            <HelpCircle className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
+            <HelpCircle className="w-3 h-3 lg:w-4 lg:h-4" />
           </button>
         </div>
         <button
           data-testid="button-reset-weights"
           onClick={() => onChange({ ...DEFAULT_WEIGHTS })}
           disabled={!isModified}
-          className="flex items-center gap-1 text-[9px] lg:text-[11px] font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 lg:disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 lg:gap-1.5 text-[9px] lg:text-xs font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 lg:disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <RotateCcw className="w-2 h-2 lg:w-3 lg:h-3" />
+          <RotateCcw className="w-2 h-2 lg:w-3.5 lg:h-3.5" />
           Reset
         </button>
       </div>
 
       {helpOpen && (
-        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
+        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-2.5 lg:p-4 space-y-2 lg:space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
+            <span className="font-mono-data text-[9px] lg:text-xs uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
             <button onClick={() => setHelpOpen(false)} className="text-muted-foreground hover:text-foreground">
-              <X className="w-3 h-3" />
+              <X className="w-3 h-3 lg:w-4 lg:h-4" />
             </button>
           </div>
           {SCORING_CATEGORIES.map(cat => (
             <div key={cat}>
-              <div className="font-mono-data text-[10px] lg:text-xs font-bold text-foreground/90 lg:text-foreground mb-0.5">{HELP_INFO[cat].title}</div>
-              <div className="font-mono-data text-[10px] lg:text-xs text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
+              <div className="font-mono-data text-[10px] lg:text-sm font-bold text-foreground/90 lg:text-foreground mb-0.5">{HELP_INFO[cat].title}</div>
+              <div className="font-mono-data text-[10px] lg:text-sm text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
             </div>
           ))}
-          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 lg:text-muted-foreground pt-1 border-t border-border/50 lg:border-border">
+          <div className="font-mono-data text-[9px] lg:text-xs text-muted-foreground/60 lg:text-muted-foreground pt-1 border-t border-border/50 lg:border-border">
             0x = disabled · 1x = default · 2x = double weight
           </div>
         </div>

@@ -93,55 +93,55 @@ export default function Dashboard() {
       <Header />
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-24">
-          <div className="w-10 h-10 border-2 border-muted border-t-[hsl(var(--dw-orange))] rounded-full animate-spin mb-4" />
-          <p className="font-label text-xs uppercase text-muted-foreground animate-pulse">Scanning markets...</p>
+        <div className="flex flex-col items-center justify-center py-24 lg:py-32">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 border-2 border-muted border-t-[hsl(var(--dw-orange))] rounded-full animate-spin mb-4 lg:mb-5" />
+          <p className="font-label text-xs lg:text-sm uppercase text-muted-foreground animate-pulse">Scanning markets...</p>
         </div>
       ) : isError ? (
-        <div className="flex flex-col items-center justify-center py-24 text-[hsl(var(--dw-red))]">
-          <AlertCircle className="w-10 h-10 mb-3" />
-          <p className="font-label text-xs uppercase">Connection failed</p>
+        <div className="flex flex-col items-center justify-center py-24 lg:py-32 text-[hsl(var(--dw-red))]">
+          <AlertCircle className="w-10 h-10 lg:w-12 lg:h-12 mb-3 lg:mb-4" />
+          <p className="font-label text-xs lg:text-sm uppercase">Connection failed</p>
         </div>
       ) : (
-        <div className="max-w-2xl lg:max-w-5xl mx-auto">
-          <div className="sticky top-[53px] lg:top-[61px] z-40 bg-background/95 lg:bg-background backdrop-blur border-b border-border">
-            <div className="grid grid-cols-3 divide-x divide-border text-center py-3 px-2 lg:py-4 lg:px-4">
+        <div className="max-w-2xl lg:max-w-6xl mx-auto">
+          <div className="sticky top-[53px] lg:top-[81px] z-40 bg-background/95 lg:bg-background backdrop-blur border-b border-border">
+            <div className="grid grid-cols-3 divide-x divide-border text-center py-3 px-2 lg:py-5 lg:px-5">
               <button
                 data-testid="button-severity-critical"
                 onClick={() => toggleSeverity("critical")}
-                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30 lg:bg-[hsl(var(--dw-red))]/25 lg:ring-[hsl(var(--dw-red))]" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] lg:min-h-[56px] transition-colors rounded-sm py-1 lg:py-2 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30 lg:bg-[hsl(var(--dw-red))]/25 lg:ring-[hsl(var(--dw-red))]" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[10px] lg:text-xs font-label lg:font-semibold text-muted-foreground uppercase">Critical</div>
-                <div className={`text-lg lg:text-2xl font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
+                <div className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">Critical</div>
+                <div className={`text-lg lg:text-3xl font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
               </button>
               <button
                 data-testid="button-severity-high"
                 onClick={() => toggleSeverity("high")}
-                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30 lg:bg-[hsl(var(--dw-orange))]/25 lg:ring-[hsl(var(--dw-orange))]" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] lg:min-h-[56px] transition-colors rounded-sm py-1 lg:py-2 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30 lg:bg-[hsl(var(--dw-orange))]/25 lg:ring-[hsl(var(--dw-orange))]" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[10px] lg:text-xs font-label lg:font-semibold text-muted-foreground uppercase">High</div>
-                <div className={`text-lg lg:text-2xl font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
+                <div className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">High</div>
+                <div className={`text-lg lg:text-3xl font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
               </button>
-              <div className="py-1 min-h-[44px] flex flex-col justify-center">
-                <div className="text-[10px] lg:text-xs font-label lg:font-semibold text-muted-foreground uppercase">24h Vol</div>
-                <div className="text-lg lg:text-2xl font-mono-data font-bold">{formatCurrency(totalVol)}</div>
+              <div className="py-1 lg:py-2 min-h-[44px] lg:min-h-[56px] flex flex-col justify-center">
+                <div className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">24h Vol</div>
+                <div className="text-lg lg:text-3xl font-mono-data font-bold">{formatCurrency(totalVol)}</div>
               </div>
             </div>
 
-            <div className="px-3 lg:px-4 pb-2 lg:pb-3 space-y-2">
+            <div className="px-3 lg:px-5 pb-2 lg:pb-4 space-y-2 lg:space-y-3">
               <div className="flex items-center gap-2">
-                <div className="flex gap-1.5 lg:gap-2 overflow-x-auto flex-1 scrollbar-none">
+                <div className="flex gap-1.5 lg:gap-2.5 overflow-x-auto flex-1 scrollbar-none">
                   <button
                     data-testid="button-category-all"
                     onClick={() => setActiveCategory(null)}
-                    className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs lg:text-sm font-label uppercase border transition-colors flex items-center ${
+                    className={`flex-shrink-0 px-3 lg:px-4 py-2 lg:py-2.5 min-h-[40px] lg:min-h-[44px] rounded text-xs lg:text-base font-label uppercase border transition-colors flex items-center ${
                       activeCategory === null
                         ? "border-foreground/30 lg:border-foreground text-foreground bg-foreground/5 lg:bg-foreground/15"
                         : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground"
                     }`}
                   >
                     All
-                    <span className="ml-1 opacity-60 lg:opacity-100">{(markets || []).length}</span>
+                    <span className="ml-1 lg:ml-1.5 opacity-60 lg:opacity-100">{(markets || []).length}</span>
                   </button>
                   {CATEGORIES.map(cat => {
                     const count = categoryCounts[cat.id] || 0;
@@ -151,7 +151,7 @@ export default function Dashboard() {
                         key={cat.id}
                         data-testid={`button-category-${cat.id}`}
                         onClick={() => toggleCategory(cat.id)}
-                        className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs lg:text-sm font-label uppercase border transition-colors flex items-center ${
+                        className={`flex-shrink-0 px-3 lg:px-4 py-2 lg:py-2.5 min-h-[40px] lg:min-h-[44px] rounded text-xs lg:text-base font-label uppercase border transition-colors flex items-center ${
                           !isActive ? "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground" : ""
                         }`}
                         style={isActive ? {
@@ -161,19 +161,19 @@ export default function Dashboard() {
                         } : {}}
                       >
                         {cat.label}
-                        <span className="ml-1 opacity-60 lg:opacity-100">{count}</span>
+                        <span className="ml-1 lg:ml-1.5 opacity-60 lg:opacity-100">{count}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 lg:gap-3">
                 <button
                   data-testid="button-ai-recommend"
                   onClick={handleRecommend}
                   disabled={recommendMutation.isPending}
-                  className={`flex-1 py-2 rounded border text-xs lg:text-sm font-label uppercase transition-colors flex items-center justify-center gap-2 ${
+                  className={`flex-1 py-2 lg:py-3 rounded border text-xs lg:text-base font-label uppercase transition-colors flex items-center justify-center gap-2 ${
                     recommendMutation.isPending
                       ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 lg:border-[hsl(var(--dw-blue))] lg:text-[hsl(var(--dw-blue))] cursor-wait"
                       : "border-[hsl(var(--dw-blue))]/30 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 lg:bg-[hsl(var(--dw-blue))]/25 hover:bg-[hsl(var(--dw-blue))]/10 lg:hover:bg-[hsl(var(--dw-blue))]/35"
@@ -181,12 +181,12 @@ export default function Dashboard() {
                 >
                   {recommendMutation.isPending ? (
                     <>
-                      <span className="w-3 h-3 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
+                      <span className="w-3 h-3 lg:w-4 lg:h-4 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
                       Analyzing...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-3 h-3" />
+                      <Sparkles className="w-3 h-3 lg:w-4 lg:h-4" />
                       AI Recommendation
                     </>
                   )}
@@ -199,28 +199,28 @@ export default function Dashboard() {
               </div>
 
               {recommendMutation.data && (
-                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-3 lg:p-4 max-h-[40vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-2 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-transparent pb-1">
-                    <div className="text-[10px] lg:text-xs font-label text-[hsl(var(--dw-blue))] uppercase flex items-center gap-1.5">
-                      <Terminal className="w-3 h-3" /> Intelligence Briefing
+                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-3 lg:p-5 max-h-[40vh] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-2 lg:mb-3 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-transparent pb-1">
+                    <div className="text-[10px] lg:text-sm font-label text-[hsl(var(--dw-blue))] uppercase flex items-center gap-1.5">
+                      <Terminal className="w-3 h-3 lg:w-4 lg:h-4" /> Intelligence Briefing
                     </div>
                     <button
                       data-testid="button-close-recommendation"
                       onClick={() => recommendMutation.reset()}
                       className="text-muted-foreground hover:text-foreground"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3 h-3 lg:w-4 lg:h-4" />
                     </button>
                   </div>
                   <div
-                    className="text-xs lg:text-sm leading-relaxed text-foreground/85 lg:text-foreground font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 lg:[&_hr]:border-border [&_hr]:my-2"
+                    className="text-xs lg:text-base leading-relaxed text-foreground/85 lg:text-foreground font-mono-data prose prose-invert prose-xs lg:prose-base max-w-none [&_p]:my-1 lg:[&_p]:my-2 [&_ul]:my-1 lg:[&_ul]:my-2 [&_ol]:my-1 lg:[&_ol]:my-2 [&_li]:my-0.5 lg:[&_li]:my-1 [&_strong]:text-foreground [&_hr]:border-border/30 lg:[&_hr]:border-border [&_hr]:my-2 lg:[&_hr]:my-3"
                     dangerouslySetInnerHTML={{ __html: marked.parse(recommendMutation.data.recommendation, { async: false }) as string }}
                   />
                 </div>
               )}
 
               {recommendMutation.isError && (
-                <div data-testid="text-recommendation-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/5 lg:bg-[hsl(var(--dw-red))]/25 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
+                <div data-testid="text-recommendation-error" className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-red))]/20 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/5 lg:bg-[hsl(var(--dw-red))]/25 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-base">
                   {recommendMutation.error?.message || "Recommendation failed. Check connection."}
                 </div>
               )}
@@ -231,9 +231,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="p-3 lg:p-4 space-y-2 lg:space-y-3 pb-20">
+          <div className="p-3 lg:p-5 space-y-2 lg:space-y-4 pb-20">
             {filtered.length === 0 ? (
-              <div className="text-center py-16 font-label text-xs lg:text-sm text-muted-foreground uppercase">
+              <div className="text-center py-16 lg:py-20 font-label text-xs lg:text-base text-muted-foreground uppercase">
                 No markets match query
               </div>
             ) : (
@@ -243,7 +243,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="text-center py-4 text-[10px] lg:text-xs font-label text-muted-foreground/50 lg:text-muted-foreground uppercase">
+          <div className="text-center py-4 lg:py-6 text-[10px] lg:text-sm font-label text-muted-foreground/50 lg:text-muted-foreground uppercase">
             {filtered.length} markets monitored · refreshing every 30s
           </div>
         </div>
