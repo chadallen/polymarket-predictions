@@ -14,7 +14,7 @@ export default function Dashboard() {
   const { data: markets, isLoading, isError } = useMarkets(weights);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,15 +29,7 @@ export default function Dashboard() {
   };
 
   const toggleCategory = (id: string) => {
-    setActiveCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+    setActiveCategory(prev => prev === id ? null : id);
   };
 
   const filtered = useMemo(() => {
@@ -49,14 +41,14 @@ export default function Dashboard() {
       );
     }
 
-    if (activeCategories.size > 0) {
+    if (activeCategory) {
       result = result.filter(m =>
-        m.categories.some(c => activeCategories.has(c))
+        m.categories.includes(activeCategory)
       );
     }
 
     return result;
-  }, [markets, search, activeCategories]);
+  }, [markets, search, activeCategory]);
 
   const categoryCounts = useMemo(() => {
     const searchFiltered = (markets || []).filter(m =>
@@ -110,9 +102,9 @@ export default function Dashboard() {
                 <div className="flex gap-1.5 overflow-x-auto flex-1 scrollbar-none">
                   <button
                     data-testid="button-category-all"
-                    onClick={() => setActiveCategories(new Set())}
+                    onClick={() => setActiveCategory(null)}
                     className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono-data uppercase tracking-wider border transition-colors ${
-                      activeCategories.size === 0
+                      activeCategory === null
                         ? "border-foreground/30 text-foreground bg-foreground/5"
                         : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                     }`}
@@ -122,7 +114,7 @@ export default function Dashboard() {
                   </button>
                   {CATEGORIES.map(cat => {
                     const count = categoryCounts[cat.id] || 0;
-                    const isActive = activeCategories.has(cat.id);
+                    const isActive = activeCategory === cat.id;
                     return (
                       <button
                         key={cat.id}
