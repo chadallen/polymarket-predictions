@@ -1,4 +1,5 @@
-import { RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { RotateCcw, ChevronDown, ChevronUp, HelpCircle, X } from "lucide-react";
 import { type ScoringWeights, type ScoringCategory, DEFAULT_WEIGHTS, WEIGHT_LABELS } from "@/lib/scoring";
 
 interface ScoringToggleProps {
@@ -13,6 +14,25 @@ interface ScoringPanelBodyProps {
 }
 
 const SCORING_CATEGORIES: ScoringCategory[] = ["volumeSpike", "concentration", "convergence"];
+
+const HELP_INFO: Record<ScoringCategory, { title: string; detail: string }> = {
+  volumeSpike: {
+    title: "Volume Spike",
+    detail: "Measures how unusual today's trading volume is compared to the 30-day average. Also factors in absolute dollar volume and weekly price momentum. High values flag sudden surges in interest that may indicate informed trading ahead of an event.",
+  },
+  concentration: {
+    title: "Concentration",
+    detail: "Tracks what percentage of a market's all-time volume occurred in the last 24 hours. A high ratio means the market went from dormant to active very quickly — a common pattern when insiders begin positioning before news breaks.",
+  },
+  convergence: {
+    title: "Convergence",
+    detail: "Bonus signal that fires when multiple other flags trigger simultaneously. Markets where volume, concentration, and spread all spike together are far more suspicious than single-signal anomalies. Higher weight amplifies this compounding effect.",
+  },
+  spread: {
+    title: "Bid-Ask Spread",
+    detail: "Detects unusually wide spreads between buy and sell prices, indicating thin liquidity. Controlled internally but not exposed as a slider.",
+  },
+};
 
 function CompactSlider({
   category,
@@ -86,6 +106,8 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
 }
 
 export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
+  const [helpOpen, setHelpOpen] = useState(false);
+
   const isModified = SCORING_CATEGORIES.some(
     (k) => Math.abs(weights[k] - DEFAULT_WEIGHTS[k]) > 0.05
   );
@@ -96,9 +118,18 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
       className="bg-card/80 border border-border rounded px-3 py-2 space-y-1.5"
     >
       <div className="flex items-center justify-between mb-0.5">
-        <span className="font-mono-data text-[9px] uppercase tracking-widest text-muted-foreground">
-          Weights
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono-data text-[9px] uppercase tracking-widest text-muted-foreground">
+            Weights
+          </span>
+          <button
+            data-testid="button-weights-help"
+            onClick={() => setHelpOpen(!helpOpen)}
+            className={`transition-colors ${helpOpen ? "text-[hsl(var(--dw-blue))]" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <HelpCircle className="w-3 h-3" />
+          </button>
+        </div>
         <button
           data-testid="button-reset-weights"
           onClick={() => onChange({ ...DEFAULT_WEIGHTS })}
@@ -109,6 +140,26 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
           Reset
         </button>
       </div>
+
+      {helpOpen && (
+        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-2.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-mono-data text-[9px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
+            <button onClick={() => setHelpOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          {SCORING_CATEGORIES.map(cat => (
+            <div key={cat}>
+              <div className="font-mono-data text-[10px] font-bold text-foreground/90 mb-0.5">{HELP_INFO[cat].title}</div>
+              <div className="font-mono-data text-[10px] text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
+            </div>
+          ))}
+          <div className="font-mono-data text-[9px] text-muted-foreground/60 pt-1 border-t border-border/50">
+            0x = disabled · 1x = default · 2x = double weight
+          </div>
+        </div>
+      )}
 
       {SCORING_CATEGORIES.map((cat) => (
         <CompactSlider

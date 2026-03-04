@@ -219,5 +219,61 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
     }
   });
 
+  app.post(api.recommend.create.path, async (req, res) => {
+    try {
+      const input = api.recommend.create.input.parse(req.body);
+
+      const marketSummaries = input.markets.map((m, i) => {
+        const prices = m.outcomePrices || [];
+        const outcomes = m.outcomes || [];
+        const priceStr = outcomes.map((o, j) => `${o}: ${prices[j] ? (parseFloat(prices[j]) * 100).toFixed(0) + '¢' : '?'}`).join(', ');
+        return `${i + 1}. [Score ${m.score}] ${m.question}
+   Categories: ${m.categories.join(', ')}
+   24h Volume: $${parseFloat(m.volume24hr).toLocaleString()} | Total: $${parseFloat(m.volume).toLocaleString()}
+   Prices: ${priceStr}
+   Flags: ${m.flags.map(f => `${f.name} (${f.severity})`).join('; ')}`;
+      }).join('\n\n');
+
+      const prompt = `You are an expert prediction market analyst. Below are the top ${input.markets.length} markets ranked by anomaly/risk score from a surveillance dashboard monitoring Polymarket.
+
+${marketSummaries}
+
+Based on these markets and their anomaly signals, provide a concise intelligence briefing (4-6 paragraphs):
+1. Identify the 3-5 most interesting markets and explain WHY they stand out (what combination of signals makes them notable)
+2. Flag any markets where the trading patterns might suggest informed/insider activity
+3. Note any cross-market themes or patterns you see
+4. Give your assessment of which markets are worth watching most closely right now
+
+Be direct, analytical, and specific. Reference actual market names and data points. Write in a professional intelligence analysis style.`;
+
+      const response = await getAnthropicClient().messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2048,
+        messages: [{ role: "user", content: prompt }],
+      });
+
+      const content = response.content[0];
+      const text = content.type === "text" ? content.text : "No recommendation generated.";
+
+      res.status(200).json({ recommendation: text });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      console.error("Recommend error:", err);
+      const errMsg = err instanceof Error ? err.message : "";
+      if (errMsg.includes("ANTHROPIC_API_KEY is not configured")) {
+        return res.status(503).json({ message: errMsg });
+      }
+      if (errMsg.includes("401") || errMsg.includes("authentication") || errMsg.includes("invalid x-api-key")) {
+        return res.status(401).json({ message: "Invalid Anthropic API key. Please check your key in the Secrets tab." });
+      }
+      return res.status(500).json({ message: "AI recommendation failed. Please try again." });
+    }
+  });
+
   return httpServer;
 }

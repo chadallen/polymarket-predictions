@@ -18,15 +18,16 @@ Mobile-first web app that monitors Polymarket prediction markets for potential i
 - `client/src/components/ScoringPanel.tsx` — Custom scoring weights UI with sliders (0x-2x per flag category)
 - `client/src/hooks/use-markets.ts` — Fetches from Polymarket Gamma API, filters geopolitical markets, calculates risk scores, classifies categories
 - `client/src/hooks/use-trades.ts` — Fetches recent trades from Polymarket CLOB API
-- `client/src/hooks/use-analyze.ts` — Mutation hook for Claude AI analysis
+- `client/src/hooks/use-analyze.ts` — Mutation hook for Claude AI analysis (single market)
+- `client/src/hooks/use-recommend.ts` — Mutation hook for AI recommendation (top 25 markets briefing)
 - `client/src/lib/scoring.ts` — Anomaly detection scoring algorithm with configurable weights + trade enrichment
 - `client/src/lib/categories.ts` — Market category classification (Politics, Military, Economics, Cyber/Intel, Regional)
 - `client/src/lib/utils.ts` — Formatting and color utilities
 - `client/src/index.css` — Dark terminal theme, custom CSS (scanlines, glow effects)
 
 ### Backend
-- `server/routes.ts` — GET /api/markets, GET /api/trades, POST /api/analyze endpoints
-- `shared/schema.ts` — Zod schemas for analyze request/response
+- `server/routes.ts` — GET /api/markets, GET /api/trades, POST /api/analyze, POST /api/recommend endpoints
+- `shared/schema.ts` — Zod schemas for analyze/recommend request/response
 - `shared/routes.ts` — API contract definitions
 
 ### Scoring Algorithm

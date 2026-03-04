@@ -3,10 +3,11 @@ import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
 import { ScoringToggle, ScoringPanelBody } from "@/components/ScoringPanel";
 import { useMarkets } from "@/hooks/use-markets";
+import { useRecommend } from "@/hooks/use-recommend";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
 import { type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
-import { AlertCircle, Search, X } from "lucide-react";
+import { AlertCircle, Search, X, Sparkles, Terminal } from "lucide-react";
 
 export default function Dashboard() {
   const [weights, setWeights] = useState<ScoringWeights>({ ...DEFAULT_WEIGHTS });
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<"critical" | "high" | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const recommendMutation = useRecommend();
 
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
@@ -87,6 +89,23 @@ export default function Dashboard() {
   const high = allFiltered.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63).length;
   const totalVol = allFiltered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
 
+  const handleRecommend = () => {
+    if (!markets || markets.length === 0) return;
+    const top25 = markets.slice(0, 25);
+    recommendMutation.mutate({
+      markets: top25.map(m => ({
+        question: m.question,
+        score: m.riskProfile.score,
+        volume24hr: m.volume24hr || "0",
+        volume: m.volume || "0",
+        flags: m.riskProfile.flags.map(f => ({ name: f.name, severity: f.severity, points: f.points })),
+        outcomePrices: m.outcomePrices,
+        outcomes: m.outcomes,
+        categories: m.categories,
+      })),
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -128,6 +147,55 @@ export default function Dashboard() {
             </div>
 
             <div className="px-3 pb-2 space-y-2">
+              <button
+                data-testid="button-ai-recommend"
+                onClick={handleRecommend}
+                disabled={recommendMutation.isPending}
+                className={`w-full py-2 rounded border text-xs font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
+                  recommendMutation.isPending
+                    ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
+                    : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
+                }`}
+              >
+                {recommendMutation.isPending ? (
+                  <>
+                    <span className="w-3 h-3 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
+                    Analyzing top 25 markets...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3" />
+                    AI Recommendation
+                  </>
+                )}
+              </button>
+
+              {recommendMutation.data && (
+                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[10px] font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest flex items-center gap-1.5">
+                      <Terminal className="w-3 h-3" /> Intelligence Briefing
+                    </div>
+                    <button
+                      data-testid="button-close-recommendation"
+                      onClick={() => recommendMutation.reset()}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="text-xs leading-relaxed text-foreground/85 font-mono-data whitespace-pre-wrap">
+                    {recommendMutation.data.recommendation}
+                  </div>
+                </div>
+              )}
+
+              {recommendMutation.isError && (
+                <div data-testid="text-recommendation-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs">
+                  {recommendMutation.error?.message || "Recommendation failed. Check connection."}
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5 overflow-x-auto flex-1 scrollbar-none">
                   <button
