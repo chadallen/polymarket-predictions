@@ -213,7 +213,7 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div
-                    className="text-xs lg:text-sm leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                    className="text-xs lg:text-sm leading-relaxed text-foreground/85 lg:text-foreground/95 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
                     dangerouslySetInnerHTML={{ __html: marked.parse(recommendMutation.data.recommendation, { async: false }) as string }}
                   />
                 </div>
@@ -243,7 +243,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="text-center py-4 text-[10px] lg:text-xs font-mono-data text-muted-foreground/50 uppercase tracking-widest">
+          <div className="text-center py-4 text-[10px] lg:text-xs font-mono-data text-muted-foreground/50 lg:text-muted-foreground/70 uppercase tracking-widest">
             {filtered.length} markets monitored · refreshing every 30s
           </div>
         </div>

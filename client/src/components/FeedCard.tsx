@@ -250,7 +250,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 <Terminal className="w-3 h-3" /> Claude Assessment
               </div>
               <div
-                className="text-xs lg:text-sm leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                className="text-xs lg:text-sm leading-relaxed text-foreground/85 lg:text-foreground/95 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
                 dangerouslySetInnerHTML={{ __html: marked.parse(analyzeMutation.data.analysis, { async: false }) as string }}
               />
             </div>
@@ -273,7 +273,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
       <div className="flex items-center gap-1 text-[9px] lg:text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest mb-0.5">
         {icon} {label}
       </div>
-      <div className="font-mono-data text-xs lg:text-sm">{value}</div>
+      <div className="font-mono-data text-xs lg:text-sm lg:text-foreground/90">{value}</div>
     </div>
   );
 }

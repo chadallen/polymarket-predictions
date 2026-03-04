@@ -163,7 +163,7 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
               <div className="font-mono-data text-[10px] lg:text-xs text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
             </div>
           ))}
-          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 pt-1 border-t border-border/50">
+          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 lg:text-muted-foreground/80 pt-1 border-t border-border/50">
             0x = disabled · 1x = default · 2x = double weight
           </div>
         </div>

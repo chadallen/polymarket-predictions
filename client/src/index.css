@@ -42,7 +42,8 @@
 
   @media (min-width: 1024px) {
     :root {
-      --muted-foreground: 240 10% 68%;
+      --muted-foreground: 240 8% 78%;
+      --border: 240 15% 22%;
     }
 
     .font-mono-data {
