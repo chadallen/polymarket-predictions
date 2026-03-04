@@ -34,14 +34,14 @@ export const recommendRequestSchema = z.object({
   markets: z.array(z.object({
     question: z.string(),
     score: z.number(),
-    volume24hr: z.string(),
-    volume: z.string(),
+    volume24hr: z.union([z.string(), z.number()]).transform(String),
+    volume: z.union([z.string(), z.number()]).transform(String),
     flags: z.array(z.object({
       name: z.string(),
       severity: z.string(),
       points: z.number(),
     })),
-    outcomePrices: z.array(z.string()).optional(),
+    outcomePrices: z.array(z.union([z.string(), z.number()]).transform(String)).optional(),
     outcomes: z.array(z.string()).optional(),
     categories: z.array(z.string()),
   })),
