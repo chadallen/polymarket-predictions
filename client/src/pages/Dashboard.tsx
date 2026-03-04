@@ -51,18 +51,15 @@ export default function Dashboard() {
       counts[cat.id] = searchFiltered.filter(m => m.categories.includes(cat.id)).length;
     }
     return counts;
-  }, [markets, search]);
+  }, [markets]);
 
   const allFiltered = useMemo(() => {
     let result = markets || [];
-    if (search) {
-      result = result.filter(m => m.question.toLowerCase().includes(search.toLowerCase()));
-    }
     if (activeCategory) {
       result = result.filter(m => m.categories.includes(activeCategory));
     }
     return result;
-  }, [markets, search, activeCategory]);
+  }, [markets, activeCategory]);
 
   const critical = allFiltered.filter(m => m.riskProfile.score >= 63).length;
   const high = allFiltered.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63).length;
