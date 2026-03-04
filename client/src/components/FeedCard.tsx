@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { marked } from "marked";
 import { type DarkWatchMarket } from "@/hooks/use-markets";
 import { useTrades } from "@/hooks/use-trades";
 import { useAnalyze } from "@/hooks/use-analyze";
+import { enrichScoreWithTrades, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { formatCurrency, formatCents, cn, getScoreColor, getScoreBg } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
@@ -11,16 +12,22 @@ import { ChevronDown, ChevronUp, ExternalLink, TrendingUp, Activity, Zap, Termin
 interface FeedCardProps {
   market: DarkWatchMarket;
   rank: number;
+  weights?: ScoringWeights;
 }
 
-export function FeedCard({ market, rank }: FeedCardProps) {
+export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { data: trades, isLoading: tradesLoading } = useTrades(expanded ? market.id : null);
   const analyzeMutation = useAnalyze();
   const isMock = market.id.startsWith("mock-");
 
-  const score = market.riskProfile.score;
-  const flags = market.riskProfile.flags;
+  const enrichedProfile = useMemo(() => {
+    if (!trades || trades.length === 0) return market.riskProfile;
+    return enrichScoreWithTrades(market.riskProfile, trades, weights);
+  }, [market.riskProfile, trades, weights]);
+
+  const score = enrichedProfile.score;
+  const flags = enrichedProfile.flags;
 
   const severityLabel = score >= 63 ? "CRITICAL" : score >= 58 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
 

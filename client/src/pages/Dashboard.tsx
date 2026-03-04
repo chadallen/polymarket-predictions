@@ -238,7 +238,7 @@ export default function Dashboard() {
               </div>
             ) : (
               filtered.map((market, i) => (
-                <FeedCard key={market.id} market={market} rank={i + 1} />
+                <FeedCard key={market.id} market={market} rank={i + 1} weights={weights} />
               ))
             )}
           </div>

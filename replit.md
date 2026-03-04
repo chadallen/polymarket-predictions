@@ -32,13 +32,16 @@ Mobile-first web app that monitors Polymarket prediction markets for potential i
 
 ### Scoring Algorithm
 Markets scored 1-99 using continuous log-scaled scoring (weights configurable via UI 0x-2x):
-- **Volume Spike** — Log2-scaled spike ratio vs 30-day avg (up to 28 pts), absolute volume log10-scaled (up to 10 pts), weekly price momentum (up to 12 pts)
+- **Volume Spike** — Log2-scaled spike ratio vs actual historical daily average (based on market age from `startDate`), absolute volume log10-scaled (up to 10 pts), weekly price momentum (up to 12 pts)
 - **Concentration** — Log10-scaled 24h/all-time volume ratio (up to 22 pts)
-- **Convergence** — Multi-signal convergence bonus scaled by flag count (up to 10 pts)
+- **Baseline Deviation** — Weekly deviation (vol24h vs 7-day daily avg, up to 18 pts), volume acceleration (weekly vs monthly avg, up to 12 pts), young market surge (markets <14 days old with high volume, up to 10 pts)
+- **Time Decay** — Trade recency analysis: volume concentration in recent quarter of window (up to 16 pts), activity surge ratio in last 2hrs vs 12hrs (up to 14 pts)
+- **Convergence** — Multi-signal convergence bonus scaled by flag count (up to 12 pts)
 - **Spread** — Bid-ask spread linearly scaled (up to 8 pts)
 - Trade enrichment (when expanded): one-sided order flow including fully-one-sided detection (up to 15 pts), trade clustering (up to 18 pts), large trades (up to 20 pts)
 - `smoothScale(value, low, high, maxPts)` provides truly continuous 0→maxPts interpolation (no step-function jumps)
-- Spike ratio computed with `Math.max(volTotal, vol24)` to handle stale volume snapshots
+- Historical baseline uses market's actual age (`startDate` from Polymarket) instead of fixed 30-day assumption
+- Weekly/monthly volume data (`volume1wk`, `volume1mo`) from Polymarket used for baseline deviation detection
 
 ### Category System
 Markets classified into 6 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):

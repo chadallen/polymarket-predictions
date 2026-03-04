@@ -12,13 +12,15 @@ export interface MarketRiskProfile {
   priceChange24h: number;
 }
 
-export type ScoringCategory = "volumeSpike" | "concentration" | "spread" | "convergence";
+export type ScoringCategory = "volumeSpike" | "concentration" | "spread" | "convergence" | "timeDecay" | "baseline";
 
 export interface ScoringWeights {
   volumeSpike: number;
   concentration: number;
   spread: number;
   convergence: number;
+  timeDecay: number;
+  baseline: number;
 }
 
 export const DEFAULT_WEIGHTS: ScoringWeights = {
@@ -26,6 +28,8 @@ export const DEFAULT_WEIGHTS: ScoringWeights = {
   concentration: 1.0,
   spread: 1.0,
   convergence: 1.0,
+  timeDecay: 1.0,
+  baseline: 1.0,
 };
 
 export const WEIGHT_LABELS: Record<ScoringCategory, { label: string; description: string }> = {
@@ -33,6 +37,8 @@ export const WEIGHT_LABELS: Record<ScoringCategory, { label: string; description
   concentration: { label: "Concentration", description: "24h volume as % of all-time volume" },
   spread: { label: "Bid-Ask Spread", description: "Wide spread indicating thin liquidity" },
   convergence: { label: "Convergence", description: "Multiple signals firing together" },
+  timeDecay: { label: "Time Decay", description: "Recent trade clustering in last 1-2 hours" },
+  baseline: { label: "Baseline Dev", description: "Deviation from market's historical norm" },
 };
 
 function clampWeight(weight: number): number {
@@ -52,12 +58,16 @@ export function calculateMarketRisk(market: any, weights: ScoringWeights = DEFAU
 
   const vol24 = parseFloat(market.volume24hr || "0");
   const volTotal = parseFloat(market.volume || "0");
+  const vol1wk = parseFloat(market.volume1wk || "0");
+  const vol1mo = parseFloat(market.volume1mo || "0");
 
-  let volumeSpikeRatio = 0;
-  if (vol24 > 0 && volTotal > 0) {
-    const avgDaily = Math.max(volTotal, vol24) / 30;
-    volumeSpikeRatio = avgDaily > 0 ? vol24 / avgDaily : 0;
-  }
+  const parsedStart = market.startDate ? new Date(market.startDate) : null;
+  const startDate = parsedStart && !isNaN(parsedStart.getTime()) ? parsedStart : null;
+  const now = new Date();
+  const marketAgeDays = startDate ? Math.max(1, (now.getTime() - startDate.getTime()) / 86400000) : 30;
+
+  const avgDaily = volTotal > 0 ? volTotal / marketAgeDays : 0;
+  let volumeSpikeRatio = avgDaily > 0 ? vol24 / avgDaily : 0;
 
   const w1 = clampWeight(weights.volumeSpike);
   if (volumeSpikeRatio > 1.2) {
@@ -66,7 +76,7 @@ export function calculateMarketRisk(market: any, weights: ScoringWeights = DEFAU
     score += pts;
     const severity: DetectionFlag["severity"] = volumeSpikeRatio > 5 ? "CRITICAL" : volumeSpikeRatio > 2.5 ? "HIGH" : "MEDIUM";
     flags.push({
-      name: `Volume Spike (${volumeSpikeRatio.toFixed(1)}x daily avg)`,
+      name: `Volume Spike (${volumeSpikeRatio.toFixed(1)}x daily avg over ${Math.round(marketAgeDays)}d)`,
       severity,
       points: Math.round(pts),
       category: "volumeSpike",
@@ -140,14 +150,60 @@ export function calculateMarketRisk(market: any, weights: ScoringWeights = DEFAU
     });
   }
 
+  const wBaseline = clampWeight(weights.baseline);
+
+  if (vol1wk > 0 && vol24 > 0) {
+    const weeklyDailyAvg = vol1wk / 7;
+    const weekDeviation = weeklyDailyAvg > 0 ? vol24 / weeklyDailyAvg : 0;
+    if (weekDeviation > 2) {
+      const pts = smoothScale(weekDeviation, 2, 15, 18) * wBaseline;
+      score += pts;
+      flags.push({
+        name: `Weekly Baseline Deviation (${weekDeviation.toFixed(1)}x 7d avg)`,
+        severity: weekDeviation > 8 ? "CRITICAL" : weekDeviation > 4 ? "HIGH" : "MEDIUM",
+        points: Math.round(pts),
+        category: "baseline",
+      });
+    }
+  }
+
+  if (vol1mo > 0 && vol1wk > 0) {
+    const monthlyWeekAvg = vol1mo / 4;
+    const weekAccel = monthlyWeekAvg > 0 ? vol1wk / monthlyWeekAvg : 0;
+    if (weekAccel > 2.5) {
+      const pts = smoothScale(weekAccel, 2.5, 10, 12) * wBaseline;
+      score += pts;
+      flags.push({
+        name: `Volume Acceleration (week ${weekAccel.toFixed(1)}x vs monthly avg)`,
+        severity: weekAccel > 6 ? "HIGH" : weekAccel > 3.5 ? "MEDIUM" : "LOW",
+        points: Math.round(pts),
+        category: "baseline",
+      });
+    }
+  }
+
+  if (marketAgeDays < 14 && vol24 > 50000) {
+    const youngMarketIntensity = vol24 / Math.max(marketAgeDays, 1);
+    const pts = smoothScale(youngMarketIntensity, 5000, 200000, 10) * wBaseline;
+    if (pts > 0) {
+      score += pts;
+      flags.push({
+        name: `Young Market Surge (${Math.round(marketAgeDays)}d old, $${(vol24 / 1000).toFixed(0)}K/24h)`,
+        severity: marketAgeDays < 3 ? "HIGH" : "MEDIUM",
+        points: Math.round(pts),
+        category: "baseline",
+      });
+    }
+  }
+
   const w4 = clampWeight(weights.convergence);
   const activeFlags = flags.length;
   if (activeFlags >= 2) {
-    const convergenceBonus = smoothScale(activeFlags, 1, 5, 10) * w4;
+    const convergenceBonus = smoothScale(activeFlags, 1, 6, 12) * w4;
     score += convergenceBonus;
     flags.push({
       name: `${activeFlags} signals converging`,
-      severity: activeFlags >= 4 ? "HIGH" : "MEDIUM",
+      severity: activeFlags >= 5 ? "HIGH" : "MEDIUM",
       points: Math.round(convergenceBonus),
       category: "convergence",
     });
@@ -165,7 +221,8 @@ export function calculateMarketRisk(market: any, weights: ScoringWeights = DEFAU
 
 export function enrichScoreWithTrades(
   profile: MarketRiskProfile,
-  trades: Array<{ price: number; size: number; side: string; timestamp: string }>
+  trades: Array<{ price: number; size: number; side: string; timestamp: string }>,
+  weights: ScoringWeights = DEFAULT_WEIGHTS
 ): MarketRiskProfile {
   if (!trades || trades.length === 0) return profile;
 
@@ -212,6 +269,58 @@ export function enrichScoreWithTrades(
     const pts = smoothScale(maxRatio, 5, 50, 20);
     score += pts;
     flags.push({ name: `Large Trade(s) Detected (${largeTrades.length} @ >${Math.round(maxRatio)}x avg)`, severity: largeTrades.length >= 3 ? "CRITICAL" : "HIGH", points: Math.round(pts), category: "volumeSpike" });
+  }
+
+  const wTimeDecay = clampWeight(weights.timeDecay);
+  const now = Date.now();
+  const sorted = [...trades].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+  if (sorted.length >= 3) {
+    const tradeTimestamps = sorted.map(t => new Date(t.timestamp).getTime());
+    const tradeSizes = sorted.map(t => t.size);
+    const oldestTrade = tradeTimestamps[0];
+    const newestTrade = tradeTimestamps[tradeTimestamps.length - 1];
+    const totalSpan = newestTrade - oldestTrade;
+
+    if (totalSpan > 0) {
+      const recentCutoff = newestTrade - totalSpan * 0.25;
+      let recentVolume = 0;
+      let totalVolume = 0;
+      for (let i = 0; i < tradeSizes.length; i++) {
+        totalVolume += tradeSizes[i];
+        if (tradeTimestamps[i] >= recentCutoff) {
+          recentVolume += tradeSizes[i];
+        }
+      }
+
+      const recentPct = totalVolume > 0 ? recentVolume / totalVolume : 0;
+      if (recentPct > 0.6) {
+        const pts = smoothScale(recentPct, 0.6, 0.95, 16) * wTimeDecay;
+        score += pts;
+        flags.push({
+          name: `Recency Spike (${(recentPct * 100).toFixed(0)}% volume in last quarter of window)`,
+          severity: recentPct > 0.85 ? "CRITICAL" : recentPct > 0.75 ? "HIGH" : "MEDIUM",
+          points: Math.round(pts),
+          category: "timeDecay",
+        });
+      }
+    }
+
+    const last2hr = tradeTimestamps.filter(t => now - t < 7200000).length;
+    const last12hr = tradeTimestamps.filter(t => now - t < 43200000).length;
+    if (last12hr > 0) {
+      const recencyRatio = last2hr / last12hr;
+      if (recencyRatio > 0.5 && last2hr >= 3) {
+        const pts = smoothScale(recencyRatio, 0.5, 0.95, 14) * wTimeDecay;
+        score += pts;
+        flags.push({
+          name: `Activity Surge (${last2hr}/${last12hr} trades in last 2hr)`,
+          severity: recencyRatio > 0.8 ? "HIGH" : "MEDIUM",
+          points: Math.round(pts),
+          category: "timeDecay",
+        });
+      }
+    }
   }
 
   score = Math.min(Math.max(score, 1), 99);

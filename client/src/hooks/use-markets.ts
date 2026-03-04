@@ -8,8 +8,11 @@ export interface PolymarketData {
   conditionId: string;
   slug: string;
   endDate: string;
+  startDate?: string;
   volume: string;
   volume24hr: string;
+  volume1wk?: string;
+  volume1mo?: string;
   outcomes: string[];
   outcomePrices: string[];
   active: boolean;

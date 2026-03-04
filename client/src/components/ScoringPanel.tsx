@@ -13,20 +13,28 @@ interface ScoringPanelBodyProps {
   onChange: (weights: ScoringWeights) => void;
 }
 
-const SCORING_CATEGORIES: ScoringCategory[] = ["volumeSpike", "concentration", "convergence"];
+const SCORING_CATEGORIES: ScoringCategory[] = ["volumeSpike", "concentration", "baseline", "timeDecay", "convergence"];
 
 const HELP_INFO: Record<ScoringCategory, { title: string; detail: string }> = {
   volumeSpike: {
     title: "Volume Spike",
-    detail: "Measures how unusual today's trading volume is compared to the 30-day average. Also factors in absolute dollar volume and weekly price momentum. High values flag sudden surges in interest that may indicate informed trading ahead of an event.",
+    detail: "Measures how unusual today's trading volume is compared to the market's actual historical daily average (based on market age). Also factors in absolute dollar volume and weekly price momentum.",
   },
   concentration: {
     title: "Concentration",
     detail: "Tracks what percentage of a market's all-time volume occurred in the last 24 hours. A high ratio means the market went from dormant to active very quickly — a common pattern when insiders begin positioning before news breaks.",
   },
+  baseline: {
+    title: "Baseline Deviation",
+    detail: "Compares current activity against the market's own historical norms. Uses weekly and monthly volume data to detect when a market breaks from its established pattern. Flags young markets with sudden surges as higher risk.",
+  },
+  timeDecay: {
+    title: "Time Decay",
+    detail: "Analyzes how recent the trading activity is within the data window. Flags markets where a disproportionate share of volume happened in the most recent hours — the signature of fast-moving informed trading.",
+  },
   convergence: {
     title: "Convergence",
-    detail: "Bonus signal that fires when multiple other flags trigger simultaneously. Markets where volume, concentration, and spread all spike together are far more suspicious than single-signal anomalies. Higher weight amplifies this compounding effect.",
+    detail: "Bonus signal that fires when multiple other flags trigger simultaneously. Markets where volume, baseline, and time-decay all spike together are far more suspicious than single-signal anomalies.",
   },
   spread: {
     title: "Bid-Ask Spread",
