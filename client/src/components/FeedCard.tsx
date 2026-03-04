@@ -21,7 +21,7 @@ export function FeedCard({ market, rank }: FeedCardProps) {
   const score = market.riskProfile.score;
   const flags = market.riskProfile.flags;
 
-  const severityLabel = score >= 80 ? "CRITICAL" : score >= 55 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
+  const severityLabel = score >= 60 ? "CRITICAL" : score >= 35 ? "HIGH" : score >= 15 ? "MODERATE" : "LOW";
 
   const handleAnalyze = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,8 +50,8 @@ export function FeedCard({ market, rank }: FeedCardProps) {
       data-testid={`feed-card-${market.id}`}
       className={cn(
         "border rounded-md",
-        score >= 80 ? "border-[hsl(var(--dw-red))]/30 bg-[hsl(var(--dw-red))]/[0.03]" :
-        score >= 55 ? "border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.02]" :
+        score >= 60 ? "border-[hsl(var(--dw-red))]/30 bg-[hsl(var(--dw-red))]/[0.03]" :
+        score >= 35 ? "border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.02]" :
         "border-border bg-card/40"
       )}
     >
@@ -84,9 +84,9 @@ export function FeedCard({ market, rank }: FeedCardProps) {
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={cn(
               "text-[10px] px-1.5 py-0.5 rounded font-mono-data uppercase tracking-wider",
-              score >= 80 ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
-              score >= 55 ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
-              score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
+              score >= 60 ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
+              score >= 35 ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
+              score >= 15 ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
               "bg-[hsl(var(--dw-green))]/15 text-[hsl(var(--dw-green))]"
             )}>
               {severityLabel}
