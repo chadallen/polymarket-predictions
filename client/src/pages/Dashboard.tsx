@@ -18,7 +18,7 @@ export default function Dashboard() {
   const totalVol = filtered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
 
   return (
-    <div className="min-h-screen bg-background text-foreground scanlines">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
 
       {isLoading ? (

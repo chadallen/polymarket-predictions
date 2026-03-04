@@ -84,11 +84,20 @@ export function useMarkets() {
 
         const filtered: DarkWatchMarket[] = data
           .filter((m: any) => geoPattern.test(m.question || ''))
-          .map((m: any) => ({
-            ...m,
-            riskProfile: calculateMarketRisk(m),
-            isMock: false,
-          }))
+          .map((m: any) => {
+            let outcomes = m.outcomes;
+            let outcomePrices = m.outcomePrices;
+            try { outcomes = typeof outcomes === 'string' ? JSON.parse(outcomes) : outcomes; } catch { outcomes = []; }
+            try { outcomePrices = typeof outcomePrices === 'string' ? JSON.parse(outcomePrices) : outcomePrices; } catch { outcomePrices = []; }
+            if (!Array.isArray(outcomes)) outcomes = [];
+            if (!Array.isArray(outcomePrices)) outcomePrices = [];
+            const parsed = { ...m, outcomes, outcomePrices };
+            return {
+              ...parsed,
+              riskProfile: calculateMarketRisk(parsed),
+              isMock: false,
+            };
+          })
           .sort((a: DarkWatchMarket, b: DarkWatchMarket) => b.riskProfile.score - a.riskProfile.score);
 
         if (filtered.length === 0) return getMockMarkets().sort((a, b) => b.riskProfile.score - a.riskProfile.score);

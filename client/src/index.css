@@ -46,24 +46,6 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  .scanlines::before {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.15) 50%
-    );
-    background-size: 100% 4px;
-    z-index: 9999;
-    pointer-events: none;
-  }
-
   .text-glow-red {
     text-shadow: 0 0 10px rgba(255, 42, 42, 0.6);
   }
