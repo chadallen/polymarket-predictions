@@ -56,8 +56,8 @@ function CompactSlider({
   const isZero = value < 0.05;
 
   return (
-    <div className="flex items-center gap-2.5 min-w-0">
-      <span className="font-mono-data text-xs text-muted-foreground w-[80px] flex-shrink-0 truncate">{label}</span>
+    <div className="flex items-center gap-2.5 lg:gap-3 min-w-0">
+      <span className="font-mono-data text-xs lg:text-sm text-muted-foreground w-[80px] lg:w-[110px] flex-shrink-0 truncate">{label}</span>
       <input
         data-testid={`slider-weight-${category}`}
         type="range"
@@ -83,7 +83,7 @@ function CompactSlider({
       />
       <span
         data-testid={`text-weight-${category}`}
-        className={`font-mono-data text-xs font-bold tabular-nums w-[32px] text-right flex-shrink-0 ${
+        className={`font-mono-data text-xs lg:text-sm font-bold tabular-nums w-[32px] lg:w-[40px] text-right flex-shrink-0 ${
           isZero ? "text-muted-foreground" : isDefault ? "text-foreground" : "text-[hsl(var(--dw-orange))]"
         }`}
       >
@@ -100,7 +100,7 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
     <button
       data-testid="button-adjust-weights"
       onClick={onToggle}
-      className={`flex items-center gap-1.5 font-mono-data text-xs uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
+      className={`flex items-center gap-1.5 font-mono-data text-xs lg:text-sm uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
         isModified
           ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 bg-[hsl(var(--dw-orange))]/5"
           : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20"
@@ -123,11 +123,11 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
   return (
     <div
       data-testid="panel-scoring-weights"
-      className="bg-card/80 border border-border rounded px-3 py-2 space-y-1.5"
+      className="bg-card/80 border border-border rounded px-3 lg:px-4 py-2 lg:py-3 space-y-1.5 lg:space-y-2"
     >
       <div className="flex items-center justify-between mb-0.5">
         <div className="flex items-center gap-1.5">
-          <span className="font-mono-data text-[9px] uppercase tracking-widest text-muted-foreground">
+          <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-muted-foreground">
             Weights
           </span>
           <button
@@ -135,35 +135,35 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
             onClick={() => setHelpOpen(!helpOpen)}
             className={`transition-colors ${helpOpen ? "text-[hsl(var(--dw-blue))]" : "text-muted-foreground hover:text-foreground"}`}
           >
-            <HelpCircle className="w-3 h-3" />
+            <HelpCircle className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
           </button>
         </div>
         <button
           data-testid="button-reset-weights"
           onClick={() => onChange({ ...DEFAULT_WEIGHTS })}
           disabled={!isModified}
-          className="flex items-center gap-1 text-[9px] font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 text-[9px] lg:text-[11px] font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <RotateCcw className="w-2 h-2" />
+          <RotateCcw className="w-2 h-2 lg:w-3 lg:h-3" />
           Reset
         </button>
       </div>
 
       {helpOpen && (
-        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-2.5 space-y-2">
+        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="font-mono-data text-[9px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
+            <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
             <button onClick={() => setHelpOpen(false)} className="text-muted-foreground hover:text-foreground">
               <X className="w-3 h-3" />
             </button>
           </div>
           {SCORING_CATEGORIES.map(cat => (
             <div key={cat}>
-              <div className="font-mono-data text-[10px] font-bold text-foreground/90 mb-0.5">{HELP_INFO[cat].title}</div>
-              <div className="font-mono-data text-[10px] text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
+              <div className="font-mono-data text-[10px] lg:text-xs font-bold text-foreground/90 mb-0.5">{HELP_INFO[cat].title}</div>
+              <div className="font-mono-data text-[10px] lg:text-xs text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
             </div>
           ))}
-          <div className="font-mono-data text-[9px] text-muted-foreground/60 pt-1 border-t border-border/50">
+          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 pt-1 border-t border-border/50">
             0x = disabled · 1x = default · 2x = double weight
           </div>
         </div>

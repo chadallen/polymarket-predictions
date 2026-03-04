@@ -57,7 +57,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
     <div
       data-testid={`feed-card-${market.id}`}
       className={cn(
-        "border rounded-md",
+        "border rounded-md lg:rounded-lg",
         score >= 70 ? "border-[hsl(var(--dw-red))]/30 bg-[hsl(var(--dw-red))]/[0.03]" :
         score >= 62 ? "border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.02]" :
         "border-border bg-card/40"
@@ -69,20 +69,20 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
         tabIndex={0}
         onClick={() => setExpanded(!expanded)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
-        className="w-full text-left p-4 flex gap-3 cursor-pointer select-none active:opacity-80"
+        className="w-full text-left p-4 lg:p-5 flex gap-3 lg:gap-4 cursor-pointer select-none active:opacity-80"
       >
         <div className={cn(
-          "w-12 h-12 shrink-0 rounded flex flex-col items-center justify-center border",
+          "w-12 h-12 lg:w-14 lg:h-14 shrink-0 rounded flex flex-col items-center justify-center border",
           getScoreBg(score)
         )}>
-          <span className={cn("font-mono-data font-bold text-lg leading-none", getScoreColor(score))}>
+          <span className={cn("font-mono-data font-bold text-lg lg:text-xl leading-none", getScoreColor(score))}>
             {score}
           </span>
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-medium leading-snug line-clamp-2">
+            <p className="text-sm lg:text-base font-medium leading-snug line-clamp-2">
               {isMock && <span className="text-[9px] font-mono-data text-muted-foreground bg-muted px-1 py-0.5 rounded mr-1.5 uppercase">Simulated</span>}
               {market.question}
             </p>
@@ -91,7 +91,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={cn(
-              "text-[10px] px-1.5 py-0.5 rounded font-mono-data uppercase tracking-wider",
+              "text-[10px] lg:text-[11px] px-1.5 py-0.5 rounded font-mono-data uppercase tracking-wider",
               score >= 70 ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
               score >= 62 ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
               score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
@@ -99,19 +99,19 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             )}>
               {severityLabel}
             </span>
-            <span className="text-[11px] font-mono-data text-muted-foreground">{formatCurrency(vol24)}/24h</span>
+            <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">{formatCurrency(vol24)}/24h</span>
             {market.riskProfile.volumeSpikeRatio > 1.5 && (
-              <span className="text-[11px] font-mono-data text-[hsl(var(--dw-orange))]">
+              <span className="text-[11px] lg:text-xs font-mono-data text-[hsl(var(--dw-orange))]">
                 {market.riskProfile.volumeSpikeRatio.toFixed(1)}x spike
               </span>
             )}
             {topPrice !== null && (
-              <span className="text-[11px] font-mono-data text-muted-foreground">
+              <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">
                 {topOutcome} {formatCents(topPrice)}
               </span>
             )}
             {flags.length > 0 && (
-              <span className="text-[11px] font-mono-data text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
             )}
             {market.categories.filter(c => c !== "other").map(catId => {
               const cat = CATEGORIES.find(c => c.id === catId);
@@ -120,7 +120,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 <span
                   key={catId}
                   data-testid={`badge-category-${catId}-${market.id}`}
-                  className="text-[9px] px-1 py-0.5 rounded font-mono-data uppercase tracking-wider border"
+                  className="text-[9px] lg:text-[10px] px-1 py-0.5 rounded font-mono-data uppercase tracking-wider border"
                   style={{
                     borderColor: `hsl(${cat.color} / 0.2)`,
                     color: `hsl(${cat.color} / 0.8)`,
@@ -135,11 +135,11 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-4 border-t border-border/50 pt-4">
+        <div className="px-4 lg:px-5 pb-4 lg:pb-5 space-y-4 border-t border-border/50 pt-4">
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 lg:gap-6">
             <ScoreGauge score={score} size={80} />
-            <div className="grid grid-cols-2 gap-2 flex-1">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 flex-1">
               <Stat icon={<Activity className="w-3 h-3" />} label="24h Vol" value={formatCurrency(vol24)} />
               <Stat icon={<TrendingUp className="w-3 h-3" />} label="Spike" value={`${market.riskProfile.volumeSpikeRatio.toFixed(1)}x`} />
               <Stat icon={<Activity className="w-3 h-3" />} label="Total Vol" value={formatCurrency(volTotal)} />
@@ -149,11 +149,11 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           {topPrice !== null && (
             <div className="flex items-center gap-2 text-sm font-mono-data flex-wrap">
-              <span className="text-muted-foreground text-xs">Outcomes:</span>
+              <span className="text-muted-foreground text-xs lg:text-sm">Outcomes:</span>
               {market.outcomes?.map((o, i) => {
                 const p = market.outcomePrices?.[i] ? parseFloat(market.outcomePrices[i]) : 0;
                 return (
-                  <span key={i} className="px-2 py-0.5 bg-secondary/50 rounded text-xs">
+                  <span key={i} className="px-2 py-0.5 bg-secondary/50 rounded text-xs lg:text-sm">
                     {o} {formatCents(p)}
                   </span>
                 );
@@ -163,12 +163,12 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           {flags.length > 0 && (
             <div className="space-y-1.5">
-              <span className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">Detection Flags</span>
+              <span className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">Detection Flags</span>
               {flags.map((flag, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 px-2.5 rounded bg-background/60 border border-border/50 text-xs font-mono-data">
+                <div key={i} className="flex items-center justify-between py-1.5 lg:py-2 px-2.5 lg:px-3 rounded bg-background/60 border border-border/50 text-xs lg:text-sm font-mono-data">
                   <span className="truncate mr-2">{flag.name}</span>
                   <span className={cn(
-                    "shrink-0 px-1.5 py-0.5 rounded uppercase text-[9px] tracking-wider",
+                    "shrink-0 px-1.5 py-0.5 rounded uppercase text-[9px] lg:text-[10px] tracking-wider",
                     flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 text-[hsl(var(--dw-red))]" :
                     flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 text-[hsl(var(--dw-orange))]" :
                     "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]"
@@ -181,15 +181,15 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           )}
 
           <div className="space-y-1.5">
-            <span className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">Recent Trades</span>
+            <span className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">Recent Trades</span>
             {tradesLoading ? (
-              <div className="py-4 text-center text-xs font-mono-data text-muted-foreground animate-pulse">Loading trades...</div>
+              <div className="py-4 text-center text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">Loading trades...</div>
             ) : trades && trades.length > 0 ? (
               <div className="space-y-1">
                 {trades.slice(0, 6).map((t, i) => (
-                  <div key={i} className="flex items-center justify-between py-1 px-2 rounded bg-background/40 text-[11px] font-mono-data">
+                  <div key={i} className="flex items-center justify-between py-1 lg:py-1.5 px-2 lg:px-3 rounded bg-background/40 text-[11px] lg:text-xs font-mono-data">
                     <span className={cn(
-                      "w-8",
+                      "w-8 lg:w-10",
                       t.side === "BUY" ? "text-[hsl(var(--dw-green))]" : "text-[hsl(var(--dw-red))]"
                     )}>
                       {t.side}
@@ -201,7 +201,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 ))}
               </div>
             ) : (
-              <div className="py-3 text-center text-xs font-mono-data text-muted-foreground">No recent trades</div>
+              <div className="py-3 text-center text-xs lg:text-sm font-mono-data text-muted-foreground">No recent trades</div>
             )}
           </div>
 
@@ -211,10 +211,10 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
               target="_blank"
               rel="noreferrer"
               data-testid={`link-polymarket-${market.id}`}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-xs font-mono-data uppercase tracking-wider border border-border text-muted-foreground"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3 h-3 lg:w-4 lg:h-4" />
               Polymarket
             </a>
             {!isMock && (
@@ -223,10 +223,10 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 onClick={handleAnalyze}
                 disabled={analyzeMutation.isPending}
                 className={cn(
-                  "flex-1 py-2.5 rounded text-xs font-mono-data uppercase tracking-wider border transition-colors",
+                  "flex-1 py-2.5 rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border transition-colors",
                   analyzeMutation.isPending
                     ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
-                    : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5"
+                    : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
                 )}
               >
                 {analyzeMutation.isPending ? (
@@ -236,7 +236,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    <Terminal className="w-3 h-3" />
+                    <Terminal className="w-3 h-3 lg:w-4 lg:h-4" />
                     AI Analysis
                   </span>
                 )}
@@ -245,19 +245,19 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           </div>
 
           {analyzeMutation.data && (
-            <div className="p-3 rounded border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03]">
-              <div className="text-[10px] font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest mb-2 flex items-center gap-1.5">
+            <div className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03]">
+              <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest mb-2 flex items-center gap-1.5">
                 <Terminal className="w-3 h-3" /> Claude Assessment
               </div>
               <div
-                className="text-xs leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                className="text-xs lg:text-sm leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
                 dangerouslySetInnerHTML={{ __html: marked.parse(analyzeMutation.data.analysis, { async: false }) as string }}
               />
             </div>
           )}
 
           {analyzeMutation.isError && (
-            <div data-testid="text-analysis-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs">
+            <div data-testid="text-analysis-error" className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
               {analyzeMutation.error?.message || "Analysis failed. Check connection."}
             </div>
           )}
@@ -269,11 +269,11 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="p-2 bg-background/50 rounded border border-border/50">
-      <div className="flex items-center gap-1 text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest mb-0.5">
+    <div className="p-2 lg:p-3 bg-background/50 rounded border border-border/50">
+      <div className="flex items-center gap-1 text-[9px] lg:text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest mb-0.5">
         {icon} {label}
       </div>
-      <div className="font-mono-data text-xs">{value}</div>
+      <div className="font-mono-data text-xs lg:text-sm">{value}</div>
     </div>
   );
 }
