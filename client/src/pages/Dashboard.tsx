@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
-import { ScoringButton, ScoringPanelBody } from "@/components/ScoringPanel";
+import { ScoringToggle, ScoringPanelBody } from "@/components/ScoringPanel";
 import { useMarkets } from "@/hooks/use-markets";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
@@ -144,25 +144,18 @@ export default function Dashboard() {
                   })}
                 </div>
 
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <button
-                    data-testid="button-search-toggle"
-                    onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[10px] font-mono-data uppercase tracking-wider transition-colors ${
-                      searchOpen || search
-                        ? "border-[hsl(var(--dw-blue))]/40 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
-                    }`}
-                  >
-                    <Search className="w-3 h-3" />
-                    Search
-                  </button>
-                  <ScoringButton
-                    isOpen={scoringOpen}
-                    isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
-                    onToggle={() => setScoringOpen(!scoringOpen)}
-                  />
-                </div>
+                <button
+                  data-testid="button-search-toggle"
+                  onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[10px] font-mono-data uppercase tracking-wider transition-colors ${
+                    searchOpen || search
+                      ? "border-[hsl(var(--dw-blue))]/40 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5"
+                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                  }`}
+                >
+                  <Search className="w-3 h-3" />
+                  Search
+                </button>
               </div>
 
               {searchOpen && (
@@ -186,6 +179,14 @@ export default function Dashboard() {
                   </button>
                 </div>
               )}
+
+              <div className="flex justify-center">
+                <ScoringToggle
+                  isOpen={scoringOpen}
+                  isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
+                  onToggle={() => setScoringOpen(!scoringOpen)}
+                />
+              </div>
 
               {scoringOpen && (
                 <ScoringPanelBody weights={weights} onChange={setWeights} />

@@ -1,7 +1,7 @@
-import { Settings, RotateCcw } from "lucide-react";
+import { RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { type ScoringWeights, type ScoringCategory, DEFAULT_WEIGHTS, WEIGHT_LABELS } from "@/lib/scoring";
 
-interface ScoringButtonProps {
+interface ScoringToggleProps {
   isOpen: boolean;
   isModified: boolean;
   onToggle: () => void;
@@ -12,7 +12,7 @@ interface ScoringPanelBodyProps {
   onChange: (weights: ScoringWeights) => void;
 }
 
-const SCORING_CATEGORIES: ScoringCategory[] = ["volumeSpike", "concentration", "spread", "convergence"];
+const SCORING_CATEGORIES: ScoringCategory[] = ["volumeSpike", "concentration", "convergence"];
 
 function CompactSlider({
   category,
@@ -59,28 +59,29 @@ function CompactSlider({
   );
 }
 
-export function ScoringButton({ isOpen, isModified, onToggle }: ScoringButtonProps) {
+export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringToggleProps) {
+  const Chevron = isOpen ? ChevronUp : ChevronDown;
+
   return (
     <button
-      data-testid="button-scoring-settings"
+      data-testid="button-adjust-weights"
       onClick={onToggle}
-      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-xs font-mono-data transition-colors ${
-        isOpen
-          ? "border-[hsl(var(--dw-orange))]/40 text-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/5"
-          : isModified
-          ? "border-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]"
-          : "border-border text-muted-foreground hover:text-foreground hover:border-[hsl(var(--dw-orange))]/30"
+      className={`flex items-center gap-1.5 font-mono-data text-[10px] uppercase tracking-wider transition-colors ${
+        isModified
+          ? "text-[hsl(var(--dw-orange))]"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
-      <Settings className="w-3.5 h-3.5" />
+      Adjust weights
       {isModified && <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--dw-orange))]" />}
+      <Chevron className="w-3 h-3" />
     </button>
   );
 }
 
 export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
-  const isModified = Object.keys(DEFAULT_WEIGHTS).some(
-    (k) => Math.abs(weights[k as ScoringCategory] - DEFAULT_WEIGHTS[k as ScoringCategory]) > 0.05
+  const isModified = SCORING_CATEGORIES.some(
+    (k) => Math.abs(weights[k] - DEFAULT_WEIGHTS[k]) > 0.05
   );
 
   return (
