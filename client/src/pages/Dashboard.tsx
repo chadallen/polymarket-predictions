@@ -147,28 +147,35 @@ export default function Dashboard() {
             </div>
 
             <div className="px-3 pb-2 space-y-2">
-              <button
-                data-testid="button-ai-recommend"
-                onClick={handleRecommend}
-                disabled={recommendMutation.isPending}
-                className={`w-full py-2.5 rounded border text-xs font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
-                  recommendMutation.isPending
-                    ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
-                    : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
-                }`}
-              >
-                {recommendMutation.isPending ? (
-                  <>
-                    <span className="w-3 h-3 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
-                    Analyzing top 25 markets...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3 h-3" />
-                    AI Recommendation
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  data-testid="button-ai-recommend"
+                  onClick={handleRecommend}
+                  disabled={recommendMutation.isPending}
+                  className={`flex-1 py-2 rounded border text-xs font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
+                    recommendMutation.isPending
+                      ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
+                      : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
+                  }`}
+                >
+                  {recommendMutation.isPending ? (
+                    <>
+                      <span className="w-3 h-3 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      AI Recommendation
+                    </>
+                  )}
+                </button>
+                <ScoringToggle
+                  isOpen={scoringOpen}
+                  isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
+                  onToggle={() => setScoringOpen(!scoringOpen)}
+                />
+              </div>
 
               {recommendMutation.data && (
                 <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-3">
@@ -269,14 +276,6 @@ export default function Dashboard() {
                   </button>
                 </div>
               )}
-
-              <div className="flex justify-center">
-                <ScoringToggle
-                  isOpen={scoringOpen}
-                  isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
-                  onToggle={() => setScoringOpen(!scoringOpen)}
-                />
-              </div>
 
               {scoringOpen && (
                 <ScoringPanelBody weights={weights} onChange={setWeights} />
