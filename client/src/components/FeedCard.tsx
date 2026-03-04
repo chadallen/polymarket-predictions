@@ -58,8 +58,8 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
       data-testid={`feed-card-${market.id}`}
       className={cn(
         "border rounded-md lg:rounded-lg",
-        score >= 70 ? "border-[hsl(var(--dw-red))]/30 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/[0.03] lg:bg-[hsl(var(--dw-red))]/10" :
-        score >= 62 ? "border-[hsl(var(--dw-orange))]/20 lg:border-[hsl(var(--dw-orange))]/60 bg-[hsl(var(--dw-orange))]/[0.02] lg:bg-[hsl(var(--dw-orange))]/[0.06]" :
+        score >= 70 ? "border-[hsl(var(--dw-red))]/30 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/[0.03] lg:bg-[hsl(var(--dw-red))]/20" :
+        score >= 62 ? "border-[hsl(var(--dw-orange))]/20 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/[0.02] lg:bg-[hsl(var(--dw-orange))]/15" :
         "border-border bg-card/40 lg:bg-card"
       )}
     >
@@ -69,7 +69,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
         tabIndex={0}
         onClick={() => setExpanded(!expanded)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(!expanded); }}
-        className="w-full text-left p-4 lg:p-5 flex gap-3 lg:gap-4 cursor-pointer select-none active:opacity-80"
+        className="w-full text-left p-4 lg:p-5 flex gap-3 lg:gap-4 cursor-pointer select-none active:opacity-80 lg:active:opacity-100"
       >
         <div className={cn(
           "w-12 h-12 lg:w-14 lg:h-14 shrink-0 rounded flex flex-col items-center justify-center border",
@@ -92,10 +92,10 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={cn(
               "text-[10px] lg:text-[11px] px-1.5 py-0.5 rounded font-label font-semibold uppercase",
-              score >= 70 ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/20 text-[hsl(var(--dw-red))]" :
-              score >= 62 ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/20 text-[hsl(var(--dw-orange))]" :
-              score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/20 text-[hsl(var(--dw-yellow))]" :
-              "bg-[hsl(var(--dw-green))]/15 lg:bg-[hsl(var(--dw-green))]/20 text-[hsl(var(--dw-green))]"
+              score >= 70 ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
+              score >= 62 ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
+              score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]" :
+              "bg-[hsl(var(--dw-green))]/15 lg:bg-[hsl(var(--dw-green))]/30 text-[hsl(var(--dw-green))]"
             )}>
               {severityLabel}
             </span>
@@ -122,7 +122,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                   data-testid={`badge-category-${catId}-${market.id}`}
                   className="text-[9px] lg:text-[10px] px-1 py-0.5 rounded font-label uppercase border"
                   style={{
-                    borderColor: `hsl(${cat.color} / 0.2)`,
+                    borderColor: `hsl(${cat.color} / 0.5)`,
                     color: `hsl(${cat.color})`,
                   }}
                 >
@@ -169,9 +169,9 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                   <span className="truncate mr-2">{flag.name}</span>
                   <span className={cn(
                     "shrink-0 px-1.5 py-0.5 rounded uppercase text-[9px] lg:text-[10px] tracking-wider",
-                    flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/20 text-[hsl(var(--dw-red))]" :
-                    flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/20 text-[hsl(var(--dw-orange))]" :
-                    "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/20 text-[hsl(var(--dw-yellow))]"
+                    flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
+                    flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
+                    "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
                   )}>
                     {flag.severity} +{flag.points}
                   </span>
@@ -225,8 +225,8 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 className={cn(
                   "flex-1 py-2.5 rounded text-xs lg:text-sm font-label uppercase border transition-colors",
                   analyzeMutation.isPending
-                    ? "border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))]/50 lg:text-[hsl(var(--dw-blue))]/70 cursor-wait"
-                    : "border-[hsl(var(--dw-blue))]/30 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 lg:bg-[hsl(var(--dw-blue))]/10 hover:bg-[hsl(var(--dw-blue))]/10 lg:hover:bg-[hsl(var(--dw-blue))]/20"
+                    ? "border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))]/50 lg:text-[hsl(var(--dw-blue))] cursor-wait"
+                    : "border-[hsl(var(--dw-blue))]/30 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 lg:bg-[hsl(var(--dw-blue))]/25 hover:bg-[hsl(var(--dw-blue))]/10 lg:hover:bg-[hsl(var(--dw-blue))]/35"
                 )}
               >
                 {analyzeMutation.isPending ? (
@@ -245,7 +245,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           </div>
 
           {analyzeMutation.data && (
-            <div className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/10">
+            <div className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20">
               <div className="text-[10px] lg:text-xs font-label text-[hsl(var(--dw-blue))] uppercase mb-2 flex items-center gap-1.5">
                 <Terminal className="w-3 h-3" /> Claude Assessment
               </div>
@@ -257,7 +257,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           )}
 
           {analyzeMutation.isError && (
-            <div data-testid="text-analysis-error" className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-red))]/20 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/5 lg:bg-[hsl(var(--dw-red))]/10 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
+            <div data-testid="text-analysis-error" className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-red))]/20 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/5 lg:bg-[hsl(var(--dw-red))]/25 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
               {analyzeMutation.error?.message || "Analysis failed. Check connection."}
             </div>
           )}

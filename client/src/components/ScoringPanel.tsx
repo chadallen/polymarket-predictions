@@ -102,7 +102,7 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
       onClick={onToggle}
       className={`flex items-center gap-1.5 font-mono-data text-xs lg:text-sm uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
         isModified
-          ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/5 lg:bg-[hsl(var(--dw-orange))]/10"
+          ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/5 lg:bg-[hsl(var(--dw-orange))]/25"
           : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20 lg:hover:border-foreground"
       }`}
     >
@@ -142,7 +142,7 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
           data-testid="button-reset-weights"
           onClick={() => onChange({ ...DEFAULT_WEIGHTS })}
           disabled={!isModified}
-          className="flex items-center gap-1 text-[9px] lg:text-[11px] font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 text-[9px] lg:text-[11px] font-mono-data text-muted-foreground hover:text-foreground disabled:opacity-30 lg:disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <RotateCcw className="w-2 h-2 lg:w-3 lg:h-3" />
           Reset
@@ -150,7 +150,7 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
       </div>
 
       {helpOpen && (
-        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/10 rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
+        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
             <button onClick={() => setHelpOpen(false)} className="text-muted-foreground hover:text-foreground">

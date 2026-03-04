@@ -10,7 +10,7 @@ export function Header() {
   }, []);
 
   return (
-    <header data-testid="header" className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border px-4 py-3 lg:px-8 lg:py-4">
+    <header data-testid="header" className="sticky top-0 z-50 bg-background/95 lg:bg-background backdrop-blur border-b border-border px-4 py-3 lg:px-8 lg:py-4">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2 lg:gap-3">
           <ShieldAlert className="w-4 h-4 lg:w-5 lg:h-5 text-[hsl(var(--dw-red))]" />
@@ -24,7 +24,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3 lg:gap-4">
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[hsl(var(--dw-red))]/10 border border-[hsl(var(--dw-red))]/30">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[hsl(var(--dw-red))]/10 lg:bg-[hsl(var(--dw-red))]/25 border border-[hsl(var(--dw-red))]/30 lg:border-[hsl(var(--dw-red))]">
             <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--dw-red))] animate-pulse" />
             <span className="text-[10px] lg:text-xs font-label font-semibold text-[hsl(var(--dw-red))] uppercase">Live</span>
           </div>
