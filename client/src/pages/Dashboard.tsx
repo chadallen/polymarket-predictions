@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<"critical" | "high" | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -32,6 +33,10 @@ export default function Dashboard() {
     setActiveCategory(prev => prev === id ? null : id);
   };
 
+  const toggleSeverity = (level: "critical" | "high") => {
+    setSeverityFilter(prev => prev === level ? null : level);
+  };
+
   const filtered = useMemo(() => {
     let result = markets || [];
 
@@ -47,8 +52,14 @@ export default function Dashboard() {
       );
     }
 
+    if (severityFilter === "critical") {
+      result = result.filter(m => m.riskProfile.score >= 63);
+    } else if (severityFilter === "high") {
+      result = result.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63);
+    }
+
     return result;
-  }, [markets, search, activeCategory]);
+  }, [markets, search, activeCategory, severityFilter]);
 
   const categoryCounts = useMemo(() => {
     const searchFiltered = (markets || []).filter(m =>
@@ -61,9 +72,20 @@ export default function Dashboard() {
     return counts;
   }, [markets, search]);
 
-  const critical = filtered.filter(m => m.riskProfile.score >= 70).length;
-  const high = filtered.filter(m => m.riskProfile.score >= 55 && m.riskProfile.score < 70).length;
-  const totalVol = filtered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
+  const allFiltered = useMemo(() => {
+    let result = markets || [];
+    if (search) {
+      result = result.filter(m => m.question.toLowerCase().includes(search.toLowerCase()));
+    }
+    if (activeCategory) {
+      result = result.filter(m => m.categories.includes(activeCategory));
+    }
+    return result;
+  }, [markets, search, activeCategory]);
+
+  const critical = allFiltered.filter(m => m.riskProfile.score >= 63).length;
+  const high = allFiltered.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63).length;
+  const totalVol = allFiltered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -83,14 +105,22 @@ export default function Dashboard() {
         <div className="max-w-2xl mx-auto">
           <div className="sticky top-[53px] z-40 bg-background/95 backdrop-blur border-b border-border">
             <div className="grid grid-cols-3 divide-x divide-border text-center py-2 px-2">
-              <div>
+              <button
+                data-testid="button-severity-critical"
+                onClick={() => toggleSeverity("critical")}
+                className={`transition-colors rounded-sm ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30" : "hover:bg-foreground/5"}`}
+              >
                 <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">Critical</div>
                 <div className={`text-base font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
-              </div>
-              <div>
+              </button>
+              <button
+                data-testid="button-severity-high"
+                onClick={() => toggleSeverity("high")}
+                className={`transition-colors rounded-sm ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30" : "hover:bg-foreground/5"}`}
+              >
                 <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">High</div>
                 <div className={`text-base font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
-              </div>
+              </button>
               <div>
                 <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">24h Vol</div>
                 <div className="text-base font-mono-data font-bold">{formatCurrency(totalVol)}</div>
