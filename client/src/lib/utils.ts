@@ -1,6 +1,44 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
+}
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+export function formatCents(value: number) {
+  return `${(value * 100).toFixed(1)}¢`;
+}
+
+export function getScoreColor(score: number) {
+  if (score >= 80) return "text-[hsl(var(--dw-red))]";
+  if (score >= 55) return "text-[hsl(var(--dw-orange))]";
+  if (score >= 30) return "text-[hsl(var(--dw-yellow))]";
+  return "text-[hsl(var(--dw-green))]";
+}
+
+export function getScoreBg(score: number) {
+  if (score >= 80) return "bg-[hsl(var(--dw-red))]/10 border-[hsl(var(--dw-red))]/30";
+  if (score >= 55) return "bg-[hsl(var(--dw-orange))]/10 border-[hsl(var(--dw-orange))]/30";
+  if (score >= 30) return "bg-[hsl(var(--dw-yellow))]/10 border-[hsl(var(--dw-yellow))]/30";
+  return "bg-[hsl(var(--dw-green))]/10 border-[hsl(var(--dw-green))]/30";
+}
+
+// Pseudo-random number generator based on a string seed
+export function pseudoRandom(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash) / 2147483648;
 }

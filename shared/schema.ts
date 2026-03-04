@@ -1,18 +1,31 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const analyzeRequestSchema = z.object({
+  marketId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  score: z.number(),
+  flags: z.array(
+    z.object({
+      name: z.string(),
+      severity: z.string(),
+      points: z.number(),
+    })
+  ),
+  recentTrades: z.array(
+    z.object({
+      price: z.number(),
+      size: z.number(),
+      side: z.string(),
+      timestamp: z.string(),
+    })
+  ).optional(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;
+
+export const analyzeResponseSchema = z.object({
+  analysis: z.string(),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type AnalyzeResponse = z.infer<typeof analyzeResponseSchema>;
