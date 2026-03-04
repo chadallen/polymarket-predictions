@@ -234,21 +234,22 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
    Flags: ${m.flags.map(f => `${f.name} (${f.severity})`).join('; ')}`;
       }).join('\n\n');
 
-      const prompt = `You are an expert prediction market analyst. Below are the top ${input.markets.length} markets ranked by anomaly/risk score from a surveillance dashboard monitoring Polymarket.
+      const prompt = `You are a prediction market surveillance analyst hunting for insider trading on Polymarket. Below are the top ${input.markets.length} markets ranked by anomaly score.
 
 ${marketSummaries}
 
-Based on these markets and their anomaly signals, provide a concise intelligence briefing (4-6 paragraphs):
-1. Identify the 3-5 most interesting markets and explain WHY they stand out (what combination of signals makes them notable)
-2. Flag any markets where the trading patterns might suggest informed/insider activity
-3. Note any cross-market themes or patterns you see
-4. Give your assessment of which markets are worth watching most closely right now
+Give your TOP 3 PICKS only. For each pick:
+- Market name
+- Why it looks like insider trading: what specific combination of volume spike, concentration, price movement, and timing is suspicious
+- What the "informed bet" would be (which outcome, at what price)
 
-Be direct, analytical, and specific. Reference actual market names and data points. Write in a professional intelligence analysis style.`;
+Keep it tight — 2-3 sentences per pick, no filler. Focus on the smoking gun: abnormal volume surges into illiquid markets, one-sided flow, sudden price dislocations before known events. Skip markets that are just popular.
+
+End with one sentence on any cross-market pattern if you see one.`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 2048,
+        max_tokens: 800,
         messages: [{ role: "user", content: prompt }],
       });
 
