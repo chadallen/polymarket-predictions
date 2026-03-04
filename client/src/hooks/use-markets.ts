@@ -36,7 +36,7 @@ interface RawMarket extends PolymarketData {
 
 function getMockRawMarkets(): RawMarket[] {
   const mocks = [
-    { q: "Will the Indiana Pacers win the 2026 NBA Finals?", v: "4500000", v24: "850000", cats: ["sports"] },
+    { q: "Will the EU impose new tariffs on China by Q3?", v: "4500000", v24: "850000", cats: ["economy"] },
     { q: "Will Bitcoin reach $150k before July 2025?", v: "1200000", v24: "45000", cats: ["crypto"] },
     { q: "Will OpenAI release GPT-5 before June?", v: "89000", v24: "42000", cats: ["tech"] },
     { q: "Who will win the 2028 Presidential Election?", v: "150000000", v24: "2000000", cats: ["politics"] },

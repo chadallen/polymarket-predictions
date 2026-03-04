@@ -13,12 +13,6 @@ export const CATEGORIES: Category[] = [
     glow: "text-glow-blue",
   },
   {
-    id: "sports",
-    label: "Sports",
-    color: "var(--dw-green)",
-    glow: "text-glow-green",
-  },
-  {
     id: "crypto",
     label: "Crypto",
     color: "var(--dw-orange)",

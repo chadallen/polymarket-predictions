@@ -44,14 +44,14 @@ Markets scored 1-99 using continuous log-scaled scoring (weights configurable vi
 - Weekly/monthly volume data (`volume1wk`, `volume1mo`) from Polymarket used for baseline deviation detection
 
 ### Category System
-Markets classified into 6 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):
+Markets classified into 5 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):
 - **Politics** (blue) — politics, elections, geopolitics, world events
-- **Sports** (green) — NBA, NFL, MLB, soccer, tennis, golf, UFC, Olympics
 - **Crypto** (orange) — crypto, bitcoin, ethereum, defi, crypto prices
 - **Tech** (red) — AI, tech, science, space
 - **Culture** (yellow) — culture, entertainment, music, movies, games, pop culture
 - **Economy** (gray-blue) — economy, stocks, finance, fed, inflation, business
-Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in `routes.ts` maps Polymarket tags to our 6 categories.
+Sports markets are excluded entirely (filtered out server-side via EXCLUDED_TAGS).
+Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in `routes.ts` maps Polymarket tags to our 5 categories.
 
 ### Design
 - Dark terminal aesthetic: #0a0a14 background

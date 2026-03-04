@@ -23,34 +23,6 @@ const TAG_TO_CATEGORY: Record<string, string> = {
   "world": "politics",
   "primaries": "politics",
 
-  "sports": "sports",
-  "nba": "sports",
-  "nfl": "sports",
-  "mlb": "sports",
-  "nhl": "sports",
-  "soccer": "sports",
-  "basketball": "sports",
-  "football": "sports",
-  "baseball": "sports",
-  "tennis": "sports",
-  "golf": "sports",
-  "boxing": "sports",
-  "mma": "sports",
-  "ufc": "sports",
-  "f1": "sports",
-  "cricket": "sports",
-  "rugby": "sports",
-  "nba finals": "sports",
-  "nba champion": "sports",
-  "premier league": "sports",
-  "champions league": "sports",
-  "la liga": "sports",
-  "serie a": "sports",
-  "world cup": "sports",
-  "super bowl": "sports",
-  "march madness": "sports",
-  "olympics": "sports",
-
   "crypto": "crypto",
   "crypto prices": "crypto",
   "bitcoin": "crypto",
@@ -118,11 +90,16 @@ export async function registerRoutes(
       const allMarkets: any[] = [];
       const seenIds = new Set<string>();
 
+      const EXCLUDED_TAGS = new Set(["sports", "nba", "nfl", "mlb", "nhl", "soccer", "basketball", "football", "baseball", "tennis", "golf", "boxing", "mma", "ufc", "f1", "cricket", "rugby", "nba finals", "nba champion", "premier league", "champions league", "la liga", "serie a", "world cup", "super bowl", "march madness", "olympics"]);
+
       for (const page of pages) {
         if (!page.ok) continue;
         const events = await page.json();
         for (const event of events) {
-          const categories = mapTagsToCategories(event.tags || []);
+          const tags = event.tags || [];
+          const isSports = tags.some((t: {label: string; slug: string}) => EXCLUDED_TAGS.has(t.label.toLowerCase()));
+          if (isSports) continue;
+          const categories = mapTagsToCategories(tags);
           const eventSlug = event.slug || "";
           for (const market of (event.markets || [])) {
             if (seenIds.has(market.id)) continue;
