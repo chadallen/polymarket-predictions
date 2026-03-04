@@ -83,7 +83,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm lg:text-base font-medium lg:font-semibold leading-snug line-clamp-2">
-              {isMock && <span className="text-[9px] font-mono-data text-muted-foreground bg-muted px-1 py-0.5 rounded mr-1.5 uppercase">Simulated</span>}
+              {isMock && <span className="text-[9px] font-label text-muted-foreground bg-muted px-1 py-0.5 rounded mr-1.5 uppercase">Simulated</span>}
               {market.question}
             </p>
             {expanded ? <ChevronUp className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" /> : <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" />}
@@ -91,7 +91,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className={cn(
-              "text-[10px] lg:text-[11px] px-1.5 py-0.5 rounded font-mono-data uppercase tracking-wider",
+              "text-[10px] lg:text-[11px] px-1.5 py-0.5 rounded font-label font-semibold uppercase",
               score >= 70 ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/20 text-[hsl(var(--dw-red))]" :
               score >= 62 ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/20 text-[hsl(var(--dw-orange))]" :
               score >= 30 ? "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/20 text-[hsl(var(--dw-yellow))]" :
@@ -120,7 +120,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 <span
                   key={catId}
                   data-testid={`badge-category-${catId}-${market.id}`}
-                  className="text-[9px] lg:text-[10px] px-1 py-0.5 rounded font-mono-data uppercase tracking-wider border"
+                  className="text-[9px] lg:text-[10px] px-1 py-0.5 rounded font-label uppercase border"
                   style={{
                     borderColor: `hsl(${cat.color} / 0.2)`,
                     color: `hsl(${cat.color})`,
@@ -163,7 +163,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           {flags.length > 0 && (
             <div className="space-y-1.5">
-              <span className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Detection Flags</span>
+              <span className="text-[10px] lg:text-xs font-label lg:font-semibold text-muted-foreground uppercase">Detection Flags</span>
               {flags.map((flag, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5 lg:py-2 px-2.5 lg:px-3 rounded bg-background/60 lg:bg-background border border-border/50 lg:border-border text-xs lg:text-sm font-mono-data">
                   <span className="truncate mr-2">{flag.name}</span>
@@ -181,7 +181,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           )}
 
           <div className="space-y-1.5">
-            <span className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Recent Trades</span>
+            <span className="text-[10px] lg:text-xs font-label lg:font-semibold text-muted-foreground uppercase">Recent Trades</span>
             {tradesLoading ? (
               <div className="py-4 text-center text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">Loading trades...</div>
             ) : trades && trades.length > 0 ? (
@@ -211,7 +211,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
               target="_blank"
               rel="noreferrer"
               data-testid={`link-polymarket-${market.id}`}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded text-xs lg:text-sm font-label uppercase border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="w-3 h-3 lg:w-4 lg:h-4" />
@@ -223,7 +223,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                 onClick={handleAnalyze}
                 disabled={analyzeMutation.isPending}
                 className={cn(
-                  "flex-1 py-2.5 rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border transition-colors",
+                  "flex-1 py-2.5 rounded text-xs lg:text-sm font-label uppercase border transition-colors",
                   analyzeMutation.isPending
                     ? "border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))]/50 lg:text-[hsl(var(--dw-blue))]/70 cursor-wait"
                     : "border-[hsl(var(--dw-blue))]/30 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 lg:bg-[hsl(var(--dw-blue))]/10 hover:bg-[hsl(var(--dw-blue))]/10 lg:hover:bg-[hsl(var(--dw-blue))]/20"
@@ -246,7 +246,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           {analyzeMutation.data && (
             <div className="p-3 lg:p-4 rounded border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/10">
-              <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest mb-2 flex items-center gap-1.5">
+              <div className="text-[10px] lg:text-xs font-label text-[hsl(var(--dw-blue))] uppercase mb-2 flex items-center gap-1.5">
                 <Terminal className="w-3 h-3" /> Claude Assessment
               </div>
               <div
@@ -270,7 +270,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="p-2 lg:p-3 bg-background/50 lg:bg-background rounded border border-border/50 lg:border-border">
-      <div className="flex items-center gap-1 text-[9px] lg:text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest mb-0.5">
+      <div className="flex items-center gap-1 text-[9px] lg:text-[10px] font-label text-muted-foreground uppercase mb-0.5">
         {icon} {label}
       </div>
       <div className="font-mono-data text-xs lg:text-sm lg:text-foreground">{value}</div>
