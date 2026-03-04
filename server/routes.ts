@@ -12,6 +12,89 @@ function getAnthropicClient() {
   return new Anthropic({ apiKey });
 }
 
+const TAG_TO_CATEGORY: Record<string, string> = {
+  "politics": "politics",
+  "elections": "politics",
+  "geopolitics": "politics",
+  "us election": "politics",
+  "global elections": "politics",
+  "world elections": "politics",
+  "trump": "politics",
+  "world": "politics",
+  "primaries": "politics",
+
+  "sports": "sports",
+  "nba": "sports",
+  "nfl": "sports",
+  "mlb": "sports",
+  "nhl": "sports",
+  "soccer": "sports",
+  "basketball": "sports",
+  "football": "sports",
+  "baseball": "sports",
+  "tennis": "sports",
+  "golf": "sports",
+  "boxing": "sports",
+  "mma": "sports",
+  "ufc": "sports",
+  "f1": "sports",
+  "cricket": "sports",
+  "rugby": "sports",
+  "nba finals": "sports",
+  "nba champion": "sports",
+  "premier league": "sports",
+  "champions league": "sports",
+  "la liga": "sports",
+  "serie a": "sports",
+  "world cup": "sports",
+  "super bowl": "sports",
+  "march madness": "sports",
+  "olympics": "sports",
+
+  "crypto": "crypto",
+  "crypto prices": "crypto",
+  "bitcoin": "crypto",
+  "ethereum": "crypto",
+  "solana": "crypto",
+  "defi": "crypto",
+  "nft": "crypto",
+  "altcoins": "crypto",
+
+  "ai": "tech",
+  "tech": "tech",
+  "science": "tech",
+  "space": "tech",
+
+  "culture": "culture",
+  "entertainment": "culture",
+  "music": "culture",
+  "movies": "culture",
+  "tv": "culture",
+  "awards": "culture",
+  "celebrity": "culture",
+  "social media": "culture",
+  "games": "culture",
+  "pop culture": "culture",
+
+  "economy": "economy",
+  "stocks": "economy",
+  "finance": "economy",
+  "fed": "economy",
+  "inflation": "economy",
+  "markets": "economy",
+  "business": "economy",
+  "trade": "economy",
+};
+
+function mapTagsToCategories(tags: Array<{label: string; slug: string}>): string[] {
+  const categories = new Set<string>();
+  for (const tag of tags) {
+    const cat = TAG_TO_CATEGORY[tag.label.toLowerCase()];
+    if (cat) categories.add(cat);
+  }
+  return categories.size > 0 ? Array.from(categories) : ["other"];
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -26,33 +109,40 @@ export async function registerRoutes(
         return res.json(marketsCache.data);
       }
 
-      const baseUrl = "https://gamma-api.polymarket.com/markets?active=true&closed=false&order=volume24hr&ascending=false&limit=200";
+      const baseUrl = "https://gamma-api.polymarket.com/events?active=true&closed=false&order=volume24hr&ascending=false&limit=100";
       const pages = await Promise.all([
         fetch(`${baseUrl}&offset=0`),
-        fetch(`${baseUrl}&offset=200`),
-        fetch(`${baseUrl}&offset=400`),
+        fetch(`${baseUrl}&offset=100`),
       ]);
 
-      const allData: any[] = [];
+      const allMarkets: any[] = [];
       const seenIds = new Set<string>();
+
       for (const page of pages) {
-        if (page.ok) {
-          const items = await page.json();
-          for (const item of items) {
-            if (!seenIds.has(item.id)) {
-              seenIds.add(item.id);
-              allData.push(item);
-            }
+        if (!page.ok) continue;
+        const events = await page.json();
+        for (const event of events) {
+          const categories = mapTagsToCategories(event.tags || []);
+          const eventSlug = event.slug || "";
+          for (const market of (event.markets || [])) {
+            if (seenIds.has(market.id)) continue;
+            if (!market.active || market.closed) continue;
+            seenIds.add(market.id);
+            allMarkets.push({
+              ...market,
+              polymarketCategories: categories,
+              eventSlug,
+            });
           }
         }
       }
 
-      if (allData.length === 0) {
+      if (allMarkets.length === 0) {
         return res.status(502).json({ message: "Failed to fetch markets from Polymarket" });
       }
 
-      marketsCache = { data: allData, timestamp: Date.now() };
-      res.json(allData);
+      marketsCache = { data: allMarkets, timestamp: Date.now() };
+      res.json(allMarkets);
     } catch (err) {
       console.error("Markets proxy error:", err);
       res.status(502).json({ message: "Failed to reach Polymarket API" });

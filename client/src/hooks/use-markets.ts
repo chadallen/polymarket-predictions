@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { calculateMarketRisk, type MarketRiskProfile, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
-import { classifyMarket } from "@/lib/categories";
 
 export interface PolymarketData {
   id: string;
@@ -17,6 +16,7 @@ export interface PolymarketData {
   closed: boolean;
   bestBid?: string;
   bestAsk?: string;
+  eventSlug?: string;
   events?: Array<{ slug: string; ticker?: string }>;
 }
 
@@ -33,12 +33,12 @@ interface RawMarket extends PolymarketData {
 
 function getMockRawMarkets(): RawMarket[] {
   const mocks = [
-    { q: "Will there be a ceasefire in Ukraine by July 2025?", v: "4500000", v24: "850000" },
-    { q: "Will China impose new tariffs on US tech before May?", v: "1200000", v24: "45000" },
-    { q: "Will the US confirm a drone hack originating from Iran?", v: "89000", v24: "42000" },
-    { q: "Will NATO deploy advisory troops to border regions in 2025?", v: "2100000", v24: "600000" },
-    { q: "Will OPEC announce an emergency supply cut this week?", v: "340000", v24: "15000" },
-    { q: "Who will win the upcoming Presidential Election?", v: "150000000", v24: "2000000" },
+    { q: "Will the Indiana Pacers win the 2026 NBA Finals?", v: "4500000", v24: "850000", cats: ["sports"] },
+    { q: "Will Bitcoin reach $150k before July 2025?", v: "1200000", v24: "45000", cats: ["crypto"] },
+    { q: "Will OpenAI release GPT-5 before June?", v: "89000", v24: "42000", cats: ["tech"] },
+    { q: "Who will win the 2028 Presidential Election?", v: "150000000", v24: "2000000", cats: ["politics"] },
+    { q: "Will the Fed cut rates in March?", v: "340000", v24: "15000", cats: ["economy"] },
+    { q: "Will Taylor Swift announce a new album?", v: "2100000", v24: "600000", cats: ["culture"] },
   ];
 
   return mocks.map((m, i) => ({
@@ -53,14 +53,14 @@ function getMockRawMarkets(): RawMarket[] {
     outcomePrices: ["0.34", "0.66"],
     active: true,
     closed: false,
-    categories: classifyMarket(m.q),
+    categories: m.cats,
     isMock: true,
   }));
 }
 
 function useRawMarkets() {
   return useQuery({
-    queryKey: ["markets", "all"],
+    queryKey: ["markets", "events"],
     queryFn: async (): Promise<RawMarket[]> => {
       try {
         const res = await fetch("/api/markets");
@@ -79,7 +79,7 @@ function useRawMarkets() {
               ...m,
               outcomes,
               outcomePrices,
-              categories: classifyMarket(m.question || ""),
+              categories: m.polymarketCategories || ["other"],
               isMock: false,
             };
           });

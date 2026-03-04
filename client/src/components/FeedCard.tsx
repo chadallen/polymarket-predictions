@@ -199,7 +199,7 @@ export function FeedCard({ market, rank }: FeedCardProps) {
 
           <div className="flex gap-2">
             <a
-              href={`https://polymarket.com/event/${market.events?.[0]?.slug || market.slug}`}
+              href={`https://polymarket.com/event/${market.eventSlug || market.events?.[0]?.slug || market.slug}`}
               target="_blank"
               rel="noreferrer"
               data-testid={`link-polymarket-${market.id}`}

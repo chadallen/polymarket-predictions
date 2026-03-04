@@ -38,13 +38,14 @@ Markets scored 1-99 based on (weights configurable via UI 0x-2x):
 - Trade enrichment (when expanded): order flow imbalance (12 pts), trade clustering (15 pts), large trades (up to 20 pts)
 
 ### Category System
-Markets classified into 6 categories by keyword matching on question text:
-- **Politics** (blue) — elections, presidents, geopolitics, wars, conflicts, sanctions
-- **Sports** (green) — NBA, NFL, MLB, UFC, Olympics, championships
-- **Crypto** (orange) — Bitcoin, Ethereum, DeFi, blockchain, tokens
-- **Tech** (red) — AI, big tech companies, SpaceX, semiconductors, social media
-- **Culture** (yellow) — awards, movies, music, celebrities, streaming
-- **Economy** (gray-blue) — stocks, Fed, inflation, GDP, tariffs, real estate
+Markets classified into 6 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):
+- **Politics** (blue) — politics, elections, geopolitics, world events
+- **Sports** (green) — NBA, NFL, MLB, soccer, tennis, golf, UFC, Olympics
+- **Crypto** (orange) — crypto, bitcoin, ethereum, defi, crypto prices
+- **Tech** (red) — AI, tech, science, space
+- **Culture** (yellow) — culture, entertainment, music, movies, games, pop culture
+- **Economy** (gray-blue) — economy, stocks, finance, fed, inflation, business
+Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in `routes.ts` maps Polymarket tags to our 6 categories.
 
 ### Design
 - Dark terminal aesthetic: #0a0a14 background
