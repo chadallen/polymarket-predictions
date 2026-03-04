@@ -245,7 +245,7 @@ export function FeedCard({ market, rank }: FeedCardProps) {
               <div
                 className="text-xs leading-relaxed text-foreground/85 font-mono-data prose prose-invert prose-xs max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
                 dangerouslySetInnerHTML={{ __html: marked.parse(analyzeMutation.data.analysis, { async: false }) as string }}
-              </div>
+              />
             </div>
           )}
 
