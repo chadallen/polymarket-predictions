@@ -111,7 +111,7 @@ export default function Dashboard() {
                 onClick={() => toggleSeverity("critical")}
                 className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">Critical</div>
+                <div className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Critical</div>
                 <div className={`text-lg lg:text-2xl font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
               </button>
               <button
@@ -119,11 +119,11 @@ export default function Dashboard() {
                 onClick={() => toggleSeverity("high")}
                 className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">High</div>
+                <div className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">High</div>
                 <div className={`text-lg lg:text-2xl font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
               </button>
               <div className="py-1 min-h-[44px] flex flex-col justify-center">
-                <div className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">24h Vol</div>
+                <div className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">24h Vol</div>
                 <div className="text-lg lg:text-2xl font-mono-data font-bold">{formatCurrency(totalVol)}</div>
               </div>
             </div>

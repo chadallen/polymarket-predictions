@@ -82,7 +82,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm lg:text-base font-medium leading-snug line-clamp-2">
+            <p className="text-sm lg:text-base font-medium lg:font-semibold leading-snug line-clamp-2">
               {isMock && <span className="text-[9px] font-mono-data text-muted-foreground bg-muted px-1 py-0.5 rounded mr-1.5 uppercase">Simulated</span>}
               {market.question}
             </p>
@@ -99,19 +99,19 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             )}>
               {severityLabel}
             </span>
-            <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">{formatCurrency(vol24)}/24h</span>
+            <span className="text-[11px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground">{formatCurrency(vol24)}/24h</span>
             {market.riskProfile.volumeSpikeRatio > 1.5 && (
               <span className="text-[11px] lg:text-xs font-mono-data text-[hsl(var(--dw-orange))]">
                 {market.riskProfile.volumeSpikeRatio.toFixed(1)}x spike
               </span>
             )}
             {topPrice !== null && (
-              <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">
+              <span className="text-[11px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground">
                 {topOutcome} {formatCents(topPrice)}
               </span>
             )}
             {flags.length > 0 && (
-              <span className="text-[11px] lg:text-xs font-mono-data text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
+              <span className="text-[11px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
             )}
             {market.categories.filter(c => c !== "other").map(catId => {
               const cat = CATEGORIES.find(c => c.id === catId);
@@ -163,7 +163,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
 
           {flags.length > 0 && (
             <div className="space-y-1.5">
-              <span className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">Detection Flags</span>
+              <span className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Detection Flags</span>
               {flags.map((flag, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5 lg:py-2 px-2.5 lg:px-3 rounded bg-background/60 border border-border/50 text-xs lg:text-sm font-mono-data">
                   <span className="truncate mr-2">{flag.name}</span>
@@ -181,7 +181,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           )}
 
           <div className="space-y-1.5">
-            <span className="text-[10px] lg:text-xs font-mono-data text-muted-foreground uppercase tracking-widest">Recent Trades</span>
+            <span className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Recent Trades</span>
             {tradesLoading ? (
               <div className="py-4 text-center text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">Loading trades...</div>
             ) : trades && trades.length > 0 ? (

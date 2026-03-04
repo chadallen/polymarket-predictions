@@ -39,6 +39,16 @@
     font-family: 'IBM Plex Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
+
+  @media (min-width: 1024px) {
+    :root {
+      --muted-foreground: 240 10% 68%;
+    }
+
+    .font-mono-data {
+      font-weight: 500;
+    }
+  }
 }
 
 @layer utilities {
