@@ -76,7 +76,7 @@ export function useMarkets() {
     queryKey: ["markets", "geo-filtered"],
     queryFn: async () => {
       try {
-        const res = await fetch("https://gamma-api.polymarket.com/markets?limit=500&active=true&closed=false");
+        const res = await fetch("/api/markets");
         if (!res.ok) throw new Error("Failed to fetch markets");
         const data = await res.json();
 

@@ -13,10 +13,47 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  app.get("/api/markets", async (_req, res) => {
+    try {
+      const response = await fetch(
+        "https://gamma-api.polymarket.com/markets?limit=500&active=true&closed=false"
+      );
+      if (!response.ok) {
+        return res.status(response.status).json({ message: "Failed to fetch markets from Polymarket" });
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (err) {
+      console.error("Markets proxy error:", err);
+      res.status(502).json({ message: "Failed to reach Polymarket API" });
+    }
+  });
+
+  app.get("/api/trades", async (req, res) => {
+    try {
+      const marketId = req.query.market as string;
+      if (!marketId) {
+        return res.status(400).json({ message: "market query param required" });
+      }
+      const response = await fetch(
+        `https://clob.polymarket.com/trades?market=${encodeURIComponent(marketId)}`
+      );
+      if (!response.ok) {
+        return res.status(response.status).json({ message: "Failed to fetch trades from Polymarket" });
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (err) {
+      console.error("Trades proxy error:", err);
+      res.status(502).json({ message: "Failed to reach Polymarket CLOB API" });
+    }
+  });
+
   app.post(api.analyze.create.path, async (req, res) => {
     try {
       const input = api.analyze.create.input.parse(req.body);
-      
+
       const prompt = `
 Please analyze this prediction market for potential insider trading or unusual activity.
 
