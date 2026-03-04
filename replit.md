@@ -38,12 +38,13 @@ Markets scored 1-99 based on (weights configurable via UI 0x-2x):
 - Trade enrichment (when expanded): order flow imbalance (12 pts), trade clustering (15 pts), large trades (up to 20 pts)
 
 ### Category System
-Markets classified into 5 categories by keyword matching on question text:
-- **Politics** (blue) — elections, presidents, parliament, diplomacy
-- **Military** (red) — war, troops, missiles, conflict
-- **Economics** (yellow) — sanctions, tariffs, oil, trade
-- **Cyber/Intel** (green) — cyber, hack, espionage, intelligence
-- **Regional** (orange) — specific countries/regions, territorial disputes
+Markets classified into 6 categories by keyword matching on question text:
+- **Politics** (blue) — elections, presidents, geopolitics, wars, conflicts, sanctions
+- **Sports** (green) — NBA, NFL, MLB, UFC, Olympics, championships
+- **Crypto** (orange) — Bitcoin, Ethereum, DeFi, blockchain, tokens
+- **Tech** (red) — AI, big tech companies, SpaceX, semiconductors, social media
+- **Culture** (yellow) — awards, movies, music, celebrities, streaming
+- **Economy** (gray-blue) — stocks, Fed, inflation, GDP, tariffs, real estate
 
 ### Design
 - Dark terminal aesthetic: #0a0a14 background
