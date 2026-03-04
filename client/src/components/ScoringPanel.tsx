@@ -102,8 +102,8 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
       onClick={onToggle}
       className={`flex items-center gap-1.5 font-mono-data text-xs lg:text-sm uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
         isModified
-          ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 bg-[hsl(var(--dw-orange))]/5"
-          : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20"
+          ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/5 lg:bg-[hsl(var(--dw-orange))]/10"
+          : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20 lg:hover:border-foreground"
       }`}
     >
       Adjust weights
@@ -123,7 +123,7 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
   return (
     <div
       data-testid="panel-scoring-weights"
-      className="bg-card/80 border border-border rounded px-3 lg:px-4 py-2 lg:py-3 space-y-1.5 lg:space-y-2"
+      className="bg-card/80 lg:bg-card border border-border rounded px-3 lg:px-4 py-2 lg:py-3 space-y-1.5 lg:space-y-2"
     >
       <div className="flex items-center justify-between mb-0.5">
         <div className="flex items-center gap-1.5">
@@ -150,7 +150,7 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
       </div>
 
       {helpOpen && (
-        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
+        <div data-testid="panel-weights-help" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/10 rounded p-2.5 lg:p-3 space-y-2 lg:space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-mono-data text-[9px] lg:text-[11px] uppercase tracking-widest text-[hsl(var(--dw-blue))]">Signal Guide</span>
             <button onClick={() => setHelpOpen(false)} className="text-muted-foreground hover:text-foreground">
@@ -159,11 +159,11 @@ export function ScoringPanelBody({ weights, onChange }: ScoringPanelBodyProps) {
           </div>
           {SCORING_CATEGORIES.map(cat => (
             <div key={cat}>
-              <div className="font-mono-data text-[10px] lg:text-xs font-bold text-foreground/90 mb-0.5">{HELP_INFO[cat].title}</div>
+              <div className="font-mono-data text-[10px] lg:text-xs font-bold text-foreground/90 lg:text-foreground mb-0.5">{HELP_INFO[cat].title}</div>
               <div className="font-mono-data text-[10px] lg:text-xs text-muted-foreground leading-relaxed">{HELP_INFO[cat].detail}</div>
             </div>
           ))}
-          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 lg:text-muted-foreground/80 pt-1 border-t border-border/50">
+          <div className="font-mono-data text-[9px] lg:text-[10px] text-muted-foreground/60 lg:text-muted-foreground pt-1 border-t border-border/50 lg:border-border">
             0x = disabled · 1x = default · 2x = double weight
           </div>
         </div>

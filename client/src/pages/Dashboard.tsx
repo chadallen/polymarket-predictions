@@ -104,12 +104,12 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="max-w-2xl lg:max-w-5xl mx-auto">
-          <div className="sticky top-[53px] lg:top-[61px] z-40 bg-background/95 backdrop-blur border-b border-border">
+          <div className="sticky top-[53px] lg:top-[61px] z-40 bg-background/95 lg:bg-background backdrop-blur border-b border-border">
             <div className="grid grid-cols-3 divide-x divide-border text-center py-3 px-2 lg:py-4 lg:px-4">
               <button
                 data-testid="button-severity-critical"
                 onClick={() => toggleSeverity("critical")}
-                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30 lg:bg-[hsl(var(--dw-red))]/15 lg:ring-[hsl(var(--dw-red))]/50" : "hover:bg-foreground/5"}`}
               >
                 <div className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">Critical</div>
                 <div className={`text-lg lg:text-2xl font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
@@ -117,7 +117,7 @@ export default function Dashboard() {
               <button
                 data-testid="button-severity-high"
                 onClick={() => toggleSeverity("high")}
-                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30 lg:bg-[hsl(var(--dw-orange))]/15 lg:ring-[hsl(var(--dw-orange))]/50" : "hover:bg-foreground/5"}`}
               >
                 <div className="text-[10px] lg:text-xs font-mono-data lg:font-semibold text-muted-foreground uppercase tracking-widest">High</div>
                 <div className={`text-lg lg:text-2xl font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
@@ -136,12 +136,12 @@ export default function Dashboard() {
                     onClick={() => setActiveCategory(null)}
                     className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border transition-colors flex items-center ${
                       activeCategory === null
-                        ? "border-foreground/30 text-foreground bg-foreground/5"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                        ? "border-foreground/30 lg:border-foreground text-foreground bg-foreground/5 lg:bg-foreground/10"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground"
                     }`}
                   >
                     All
-                    <span className="ml-1 opacity-60">{(markets || []).length}</span>
+                    <span className="ml-1 opacity-60 lg:opacity-100">{(markets || []).length}</span>
                   </button>
                   {CATEGORIES.map(cat => {
                     const count = categoryCounts[cat.id] || 0;
@@ -152,7 +152,7 @@ export default function Dashboard() {
                         data-testid={`button-category-${cat.id}`}
                         onClick={() => toggleCategory(cat.id)}
                         className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs lg:text-sm font-mono-data uppercase tracking-wider border transition-colors flex items-center ${
-                          !isActive ? "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20" : ""
+                          !isActive ? "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 lg:hover:border-foreground" : ""
                         }`}
                         style={isActive ? {
                           borderColor: `hsl(${cat.color} / 0.4)`,
@@ -161,7 +161,7 @@ export default function Dashboard() {
                         } : {}}
                       >
                         {cat.label}
-                        <span className="ml-1 opacity-60">{count}</span>
+                        <span className="ml-1 opacity-60 lg:opacity-100">{count}</span>
                       </button>
                     );
                   })}
@@ -175,8 +175,8 @@ export default function Dashboard() {
                   disabled={recommendMutation.isPending}
                   className={`flex-1 py-2 rounded border text-xs lg:text-sm font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
                     recommendMutation.isPending
-                      ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
-                      : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
+                      ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 lg:border-[hsl(var(--dw-blue))] lg:text-[hsl(var(--dw-blue))]/70 cursor-wait"
+                      : "border-[hsl(var(--dw-blue))]/30 lg:border-[hsl(var(--dw-blue))] text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 lg:bg-[hsl(var(--dw-blue))]/10 hover:bg-[hsl(var(--dw-blue))]/10 lg:hover:bg-[hsl(var(--dw-blue))]/20"
                   }`}
                 >
                   {recommendMutation.isPending ? (
@@ -199,8 +199,8 @@ export default function Dashboard() {
               </div>
 
               {recommendMutation.data && (
-                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-3 lg:p-4 max-h-[40vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-2 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] pb-1">
+                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/10 rounded p-3 lg:p-4 max-h-[40vh] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-2 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-transparent pb-1">
                     <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest flex items-center gap-1.5">
                       <Terminal className="w-3 h-3" /> Intelligence Briefing
                     </div>
@@ -213,14 +213,14 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div
-                    className="text-xs lg:text-sm leading-relaxed text-foreground/85 lg:text-foreground/95 font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 [&_hr]:my-2"
+                    className="text-xs lg:text-sm leading-relaxed text-foreground/85 lg:text-foreground font-mono-data prose prose-invert prose-xs lg:prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5 [&_strong]:text-foreground [&_hr]:border-border/30 lg:[&_hr]:border-border [&_hr]:my-2"
                     dangerouslySetInnerHTML={{ __html: marked.parse(recommendMutation.data.recommendation, { async: false }) as string }}
                   />
                 </div>
               )}
 
               {recommendMutation.isError && (
-                <div data-testid="text-recommendation-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
+                <div data-testid="text-recommendation-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/5 lg:bg-[hsl(var(--dw-red))]/10 text-[hsl(var(--dw-red))] font-mono-data text-xs lg:text-sm">
                   {recommendMutation.error?.message || "Recommendation failed. Check connection."}
                 </div>
               )}
@@ -243,7 +243,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="text-center py-4 text-[10px] lg:text-xs font-mono-data text-muted-foreground/50 lg:text-muted-foreground/70 uppercase tracking-widest">
+          <div className="text-center py-4 text-[10px] lg:text-xs font-mono-data text-muted-foreground/50 lg:text-muted-foreground uppercase tracking-widest">
             {filtered.length} markets monitored · refreshing every 30s
           </div>
         </div>
