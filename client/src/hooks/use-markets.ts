@@ -32,6 +32,7 @@ export interface PolymarketData {
   closed: boolean;
   bestBid?: string;
   bestAsk?: string;
+  events?: Array<{ slug: string; ticker?: string }>;
 }
 
 export type DarkWatchMarket = PolymarketData & {
