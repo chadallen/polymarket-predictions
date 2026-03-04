@@ -17,16 +17,42 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
+  let marketsCache: { data: any[]; timestamp: number } | null = null;
+  const CACHE_TTL = 15000;
+
   app.get("/api/markets", async (_req, res) => {
     try {
-      const response = await fetch(
-        "https://gamma-api.polymarket.com/markets?limit=500&active=true&closed=false"
-      );
-      if (!response.ok) {
-        return res.status(response.status).json({ message: "Failed to fetch markets from Polymarket" });
+      if (marketsCache && Date.now() - marketsCache.timestamp < CACHE_TTL) {
+        return res.json(marketsCache.data);
       }
-      const data = await response.json();
-      res.json(data);
+
+      const baseUrl = "https://gamma-api.polymarket.com/markets?active=true&closed=false&order=volume24hr&ascending=false&limit=200";
+      const pages = await Promise.all([
+        fetch(`${baseUrl}&offset=0`),
+        fetch(`${baseUrl}&offset=200`),
+        fetch(`${baseUrl}&offset=400`),
+      ]);
+
+      const allData: any[] = [];
+      const seenIds = new Set<string>();
+      for (const page of pages) {
+        if (page.ok) {
+          const items = await page.json();
+          for (const item of items) {
+            if (!seenIds.has(item.id)) {
+              seenIds.add(item.id);
+              allData.push(item);
+            }
+          }
+        }
+      }
+
+      if (allData.length === 0) {
+        return res.status(502).json({ message: "Failed to fetch markets from Polymarket" });
+      }
+
+      marketsCache = { data: allData, timestamp: Date.now() };
+      res.json(allData);
     } catch (err) {
       console.error("Markets proxy error:", err);
       res.status(502).json({ message: "Failed to reach Polymarket API" });
