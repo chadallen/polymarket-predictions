@@ -234,7 +234,11 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
    Flags: ${m.flags.map(f => `${f.name} (${f.severity})`).join('; ')}`;
       }).join('\n\n');
 
-      const prompt = `You are a prediction market surveillance analyst hunting for insider trading on Polymarket. Below are the top ${input.markets.length} markets ranked by anomaly score.
+      const categoryContext = input.activeCategory
+        ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
+        : "";
+
+      const prompt = `You are a prediction market surveillance analyst hunting for insider trading on Polymarket. Below are the top ${input.markets.length} markets ranked by anomaly score.${categoryContext}
 
 ${marketSummaries}
 
@@ -245,7 +249,7 @@ Give your TOP 3 PICKS only. For each pick:
 
 Keep it tight — 2-3 sentences per pick, no filler. Focus on the smoking gun: abnormal volume surges into illiquid markets, one-sided flow, sudden price dislocations before known events. Skip markets that are just popular.
 
-End with one sentence on any cross-market pattern if you see one.`;
+End with one sentence on any cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} if you see one.`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",

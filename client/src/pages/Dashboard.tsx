@@ -91,8 +91,14 @@ export default function Dashboard() {
 
   const handleRecommend = () => {
     if (!markets || markets.length === 0) return;
-    const top25 = markets.slice(0, 25);
+    let pool = markets;
+    if (activeCategory) {
+      pool = pool.filter(m => m.categories.includes(activeCategory));
+    }
+    const top25 = pool.slice(0, 25);
+    if (top25.length === 0) return;
     recommendMutation.mutate({
+      activeCategory: activeCategory || null,
       markets: top25.map(m => ({
         question: m.question,
         score: m.riskProfile.score,
@@ -178,8 +184,8 @@ export default function Dashboard() {
               </div>
 
               {recommendMutation.data && (
-                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-3">
-                  <div className="flex items-center justify-between mb-2">
+                <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 bg-[hsl(var(--dw-blue))]/[0.03] rounded p-3 max-h-[40vh] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-2 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] pb-1">
                     <div className="text-[10px] font-mono-data text-[hsl(var(--dw-blue))] uppercase tracking-widest flex items-center gap-1.5">
                       <Terminal className="w-3 h-3" /> Intelligence Briefing
                     </div>

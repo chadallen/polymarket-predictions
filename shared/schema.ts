@@ -31,6 +31,7 @@ export const analyzeResponseSchema = z.object({
 export type AnalyzeResponse = z.infer<typeof analyzeResponseSchema>;
 
 export const recommendRequestSchema = z.object({
+  activeCategory: z.string().nullable().optional(),
   markets: z.array(z.object({
     question: z.string(),
     score: z.number(),
