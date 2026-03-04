@@ -48,8 +48,8 @@ function CompactSlider({
   const isZero = value < 0.05;
 
   return (
-    <div className="flex items-center gap-2 min-w-0">
-      <span className="font-mono-data text-[10px] text-muted-foreground w-[72px] flex-shrink-0 truncate">{label}</span>
+    <div className="flex items-center gap-2.5 min-w-0">
+      <span className="font-mono-data text-xs text-muted-foreground w-[80px] flex-shrink-0 truncate">{label}</span>
       <input
         data-testid={`slider-weight-${category}`}
         type="range"
@@ -59,15 +59,15 @@ function CompactSlider({
         value={value}
         onChange={(e) => onChange(Math.round(parseFloat(e.target.value) * 10) / 10)}
         onInput={(e) => onChange(Math.round(parseFloat((e.target as HTMLInputElement).value) * 10) / 10)}
-        className="flex-1 h-5 appearance-none bg-transparent cursor-pointer min-w-0 touch-none
-          [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-full
-          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+        className="flex-1 h-7 appearance-none bg-transparent cursor-pointer min-w-0 touch-none
+          [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-full
+          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7
           [&::-webkit-slider-thumb]:rounded-sm [&::-webkit-slider-thumb]:bg-[hsl(var(--dw-orange))]
           [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background
           [&::-webkit-slider-thumb]:shadow-[0_0_0_1px_hsl(var(--dw-orange)/0.3)]
-          [&::-webkit-slider-thumb]:-mt-[8px] [&::-webkit-slider-thumb]:cursor-pointer
-          [&::-moz-range-track]:h-1 [&::-moz-range-track]:bg-muted [&::-moz-range-track]:rounded-full [&::-moz-range-track]:border-0
-          [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-sm
+          [&::-webkit-slider-thumb]:-mt-[11px] [&::-webkit-slider-thumb]:cursor-pointer
+          [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:bg-muted [&::-moz-range-track]:rounded-full [&::-moz-range-track]:border-0
+          [&::-moz-range-thumb]:w-7 [&::-moz-range-thumb]:h-7 [&::-moz-range-thumb]:rounded-sm
           [&::-moz-range-thumb]:bg-[hsl(var(--dw-orange))] [&::-moz-range-thumb]:border-2
           [&::-moz-range-thumb]:border-background
           [&::-moz-range-thumb]:shadow-[0_0_0_1px_hsl(var(--dw-orange)/0.3)]
@@ -75,7 +75,7 @@ function CompactSlider({
       />
       <span
         data-testid={`text-weight-${category}`}
-        className={`font-mono-data text-[10px] font-bold tabular-nums w-[28px] text-right flex-shrink-0 ${
+        className={`font-mono-data text-xs font-bold tabular-nums w-[32px] text-right flex-shrink-0 ${
           isZero ? "text-muted-foreground" : isDefault ? "text-foreground" : "text-[hsl(var(--dw-orange))]"
         }`}
       >
@@ -92,15 +92,15 @@ export function ScoringToggle({ isOpen, isModified, onToggle }: ScoringTogglePro
     <button
       data-testid="button-adjust-weights"
       onClick={onToggle}
-      className={`flex items-center gap-1.5 font-mono-data text-[10px] uppercase tracking-wider transition-colors ${
+      className={`flex items-center gap-1.5 font-mono-data text-xs uppercase tracking-wider transition-colors px-4 py-2 rounded border ${
         isModified
-          ? "text-[hsl(var(--dw-orange))]"
-          : "text-muted-foreground hover:text-foreground"
+          ? "text-[hsl(var(--dw-orange))] border-[hsl(var(--dw-orange))]/30 bg-[hsl(var(--dw-orange))]/5"
+          : "text-muted-foreground hover:text-foreground border-border hover:border-foreground/20"
       }`}
     >
       Adjust weights
       {isModified && <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--dw-orange))]" />}
-      <Chevron className="w-3 h-3" />
+      <Chevron className="w-3.5 h-3.5" />
     </button>
   );
 }

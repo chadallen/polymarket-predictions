@@ -123,26 +123,26 @@ export default function Dashboard() {
       ) : (
         <div className="max-w-2xl mx-auto">
           <div className="sticky top-[53px] z-40 bg-background/95 backdrop-blur border-b border-border">
-            <div className="grid grid-cols-3 divide-x divide-border text-center py-2 px-2">
+            <div className="grid grid-cols-3 divide-x divide-border text-center py-3 px-2">
               <button
                 data-testid="button-severity-critical"
                 onClick={() => toggleSeverity("critical")}
-                className={`transition-colors rounded-sm ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "critical" ? "bg-[hsl(var(--dw-red))]/10 ring-1 ring-[hsl(var(--dw-red))]/30" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">Critical</div>
-                <div className={`text-base font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
+                <div className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">Critical</div>
+                <div className={`text-lg font-mono-data font-bold ${critical > 0 ? "text-[hsl(var(--dw-red))] text-glow-red" : "text-muted-foreground"}`}>{critical}</div>
               </button>
               <button
                 data-testid="button-severity-high"
                 onClick={() => toggleSeverity("high")}
-                className={`transition-colors rounded-sm ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30" : "hover:bg-foreground/5"}`}
+                className={`w-full min-h-[44px] transition-colors rounded-sm py-1 ${severityFilter === "high" ? "bg-[hsl(var(--dw-orange))]/10 ring-1 ring-[hsl(var(--dw-orange))]/30" : "hover:bg-foreground/5"}`}
               >
-                <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">High</div>
-                <div className={`text-base font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
+                <div className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">High</div>
+                <div className={`text-lg font-mono-data font-bold ${high > 0 ? "text-[hsl(var(--dw-orange))] text-glow-orange" : "text-muted-foreground"}`}>{high}</div>
               </button>
-              <div>
-                <div className="text-[9px] font-mono-data text-muted-foreground uppercase tracking-widest">24h Vol</div>
-                <div className="text-base font-mono-data font-bold">{formatCurrency(totalVol)}</div>
+              <div className="py-1 min-h-[44px] flex flex-col justify-center">
+                <div className="text-[10px] font-mono-data text-muted-foreground uppercase tracking-widest">24h Vol</div>
+                <div className="text-lg font-mono-data font-bold">{formatCurrency(totalVol)}</div>
               </div>
             </div>
 
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 data-testid="button-ai-recommend"
                 onClick={handleRecommend}
                 disabled={recommendMutation.isPending}
-                className={`w-full py-2 rounded border text-xs font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
+                className={`w-full py-2.5 rounded border text-xs font-mono-data uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
                   recommendMutation.isPending
                     ? "border-[hsl(var(--dw-blue))]/20 text-[hsl(var(--dw-blue))]/50 cursor-wait"
                     : "border-[hsl(var(--dw-blue))]/30 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5 hover:bg-[hsl(var(--dw-blue))]/10"
@@ -201,7 +201,7 @@ export default function Dashboard() {
                   <button
                     data-testid="button-category-all"
                     onClick={() => setActiveCategory(null)}
-                    className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono-data uppercase tracking-wider border transition-colors ${
+                    className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs font-mono-data uppercase tracking-wider border transition-colors flex items-center ${
                       activeCategory === null
                         ? "border-foreground/30 text-foreground bg-foreground/5"
                         : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
@@ -218,7 +218,7 @@ export default function Dashboard() {
                         key={cat.id}
                         data-testid={`button-category-${cat.id}`}
                         onClick={() => toggleCategory(cat.id)}
-                        className={`flex-shrink-0 px-2 py-1 rounded text-[10px] font-mono-data uppercase tracking-wider border transition-colors ${
+                        className={`flex-shrink-0 px-3 py-2 min-h-[40px] rounded text-xs font-mono-data uppercase tracking-wider border transition-colors flex items-center ${
                           !isActive ? "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20" : ""
                         }`}
                         style={isActive ? {
@@ -237,13 +237,13 @@ export default function Dashboard() {
                 <button
                   data-testid="button-search-toggle"
                   onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[10px] font-mono-data uppercase tracking-wider transition-colors ${
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded border text-xs font-mono-data uppercase tracking-wider transition-colors ${
                     searchOpen || search
                       ? "border-[hsl(var(--dw-blue))]/40 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
                   }`}
                 >
-                  <Search className="w-3 h-3" />
+                  <Search className="w-3.5 h-3.5" />
                   Search
                 </button>
               </div>
