@@ -5,10 +5,11 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 
 function getAnthropicClient() {
-  return new Anthropic({
-    apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
-    baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
-  });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY is not configured. Please add your Anthropic API key in the Secrets tab.");
+  }
+  return new Anthropic({ apiKey });
 }
 
 export async function registerRoutes(
@@ -91,11 +92,14 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
         });
       }
       console.error("Analysis error:", err);
-      const isAuthError = err instanceof Error && (err.message?.includes("ApiKey not approved") || err.message?.includes("401"));
-      if (isAuthError) {
-        return res.status(503).json({ message: "AI analysis is temporarily unavailable. The cloud AI service may need to be re-authorized or your usage budget may have been exceeded." });
+      const errMsg = err instanceof Error ? err.message : "";
+      if (errMsg.includes("ANTHROPIC_API_KEY is not configured")) {
+        return res.status(503).json({ message: errMsg });
       }
-      return res.status(500).json({ message: "Internal server error" });
+      if (errMsg.includes("401") || errMsg.includes("authentication") || errMsg.includes("invalid x-api-key")) {
+        return res.status(401).json({ message: "Invalid Anthropic API key. Please check your key in the Secrets tab." });
+      }
+      return res.status(500).json({ message: "AI analysis failed. Please try again." });
     }
   });
 
