@@ -30,12 +30,14 @@ Mobile-first web app that monitors Polymarket prediction markets for potential i
 - `shared/routes.ts` — API contract definitions
 
 ### Scoring Algorithm
-Markets scored 1-99 based on (weights configurable via UI 0x-2x):
-- **Volume Spike** — Volume spike vs 30-day daily average (up to 30 pts)
-- **Concentration** — 24h volume as % of all-time volume (up to 20 pts)
-- **Convergence** — Multi-signal convergence (12 pts), high absolute volume + spike (10 pts)
-- **Spread** — Wide bid-ask spread (5 pts)
-- Trade enrichment (when expanded): order flow imbalance (12 pts), trade clustering (15 pts), large trades (up to 20 pts)
+Markets scored 1-99 using continuous log-scaled scoring (weights configurable via UI 0x-2x):
+- **Volume Spike** — Log2-scaled spike ratio vs 30-day avg (up to 28 pts), absolute volume log10-scaled (up to 10 pts), weekly price momentum (up to 12 pts)
+- **Concentration** — Log10-scaled 24h/all-time volume ratio (up to 22 pts)
+- **Convergence** — Multi-signal convergence bonus scaled by flag count (up to 10 pts)
+- **Spread** — Bid-ask spread linearly scaled (up to 8 pts)
+- Trade enrichment (when expanded): one-sided order flow including fully-one-sided detection (up to 15 pts), trade clustering (up to 18 pts), large trades (up to 20 pts)
+- `smoothScale(value, low, high, maxPts)` provides truly continuous 0→maxPts interpolation (no step-function jumps)
+- Spike ratio computed with `Math.max(volTotal, vol24)` to handle stale volume snapshots
 
 ### Category System
 Markets classified into 6 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):
@@ -50,7 +52,7 @@ Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in
 ### Design
 - Dark terminal aesthetic: #0a0a14 background
 - JetBrains Mono for data, IBM Plex Sans for body
-- Color coding: red (80+ critical), orange (55+ high), yellow (30+ moderate), green (low)
+- Color coding: red (60+ critical), orange (35+ high), yellow (15+ moderate), green (low)
 - Glow effects (red, orange, yellow, green, blue)
 - Mobile-first feed layout
 
