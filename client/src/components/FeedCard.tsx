@@ -230,8 +230,8 @@ export function FeedCard({ market, rank }: FeedCardProps) {
           )}
 
           {analyzeMutation.isError && (
-            <div className="p-3 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs">
-              Analysis failed. Check connection.
+            <div data-testid="text-analysis-error" className="p-3 rounded border border-[hsl(var(--dw-red))]/20 bg-[hsl(var(--dw-red))]/5 text-[hsl(var(--dw-red))] font-mono-data text-xs">
+              {analyzeMutation.error?.message || "Analysis failed. Check connection."}
             </div>
           )}
         </div>

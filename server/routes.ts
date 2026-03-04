@@ -4,10 +4,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import { api } from "@shared/routes";
 import { z } from "zod";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
-});
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+    baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+  });
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -71,7 +73,7 @@ ${input.recentTrades?.map(t => `- ${t.side} ${t.size} shares @ $${t.price} (at $
 Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly risk, treating the data as geopolitical signals.
 `;
 
-      const response = await anthropic.messages.create({
+      const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
@@ -89,6 +91,10 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
         });
       }
       console.error("Analysis error:", err);
+      const isAuthError = err instanceof Error && (err.message?.includes("ApiKey not approved") || err.message?.includes("401"));
+      if (isAuthError) {
+        return res.status(503).json({ message: "AI analysis is temporarily unavailable. The cloud AI service may need to be re-authorized or your usage budget may have been exceeded." });
+      }
       return res.status(500).json({ message: "Internal server error" });
     }
   });

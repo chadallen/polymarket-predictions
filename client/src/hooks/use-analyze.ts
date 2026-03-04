@@ -12,7 +12,8 @@ export function useAnalyze() {
       });
       
       if (!res.ok) {
-        throw new Error("Analysis failed");
+        const body = await res.json().catch(() => ({ message: "Analysis failed" }));
+        throw new Error(body.message || "Analysis failed");
       }
       
       return (await res.json()) as AnalyzeResponse;
