@@ -65,5 +65,6 @@ Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in
 - Polymarket Gamma API: `https://gamma-api.polymarket.com/markets`
 - Polymarket CLOB API: `https://clob.polymarket.com/trades`
 - Anthropic API: Claude AI analysis (requires ANTHROPIC_API_KEY secret)
-  - Per-market analysis: Anomaly assessment + real-world trade ideas (stocks, ETFs, commodities, forex — no Polymarket positions)
-  - AI Recommendation briefing: Top 3 picks with insider signal analysis + actionable real-world trades (max_tokens 1200)
+  - Per-market analysis (max_tokens 2048): Anomaly assessment + exact trade recommendations with ticker, direction, entry price, target, stop loss, timeframe, thesis
+  - AI Recommendation briefing (max_tokens 2048): Top 3 picks with insider signal + exact trade per pick (instrument, entry, target, stop, timeframe, risk/reward) + macro view trade
+  - Both prompts explicitly exclude Polymarket positions — real-world trades only (stocks, ETFs, futures, forex, options, bonds)

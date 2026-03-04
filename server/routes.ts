@@ -150,7 +150,7 @@ export async function registerRoutes(
     try {
       const input = api.analyze.create.input.parse(req.body);
 
-      const prompt = `You are a prediction market surveillance analyst and macro strategist. Analyze this market for potential insider trading or unusual activity, then suggest real-world trades that could capitalize on the same thesis.
+      const prompt = `You are a prediction market surveillance analyst and macro trading strategist. Analyze this market for insider trading signals, then give exact real-world trade recommendations.
 
 Market ID: ${input.marketId}
 Title: ${input.title}
@@ -164,14 +164,24 @@ Recent Trades:
 ${input.recentTrades?.map(t => `- ${t.side} ${t.size} shares @ $${t.price} (at ${t.timestamp})`).join('\n') || 'None'}
 
 Provide:
-1. A brief intelligence-style assessment (2-3 sentences) of the anomaly risk and what the trading signals might indicate.
-2. Under a "**Real-World Trade Ideas**" heading, suggest 2-3 specific real-world trades (stocks, ETFs, commodities futures, forex pairs, options strategies) that would benefit if the insider thesis is correct. Be specific — name tickers, direction (long/short), and the logic connecting the prediction market signal to the real-world asset. Think oil futures, gold, defense stocks, currency pairs, sector ETFs, individual equities, etc.
+1. **Anomaly Assessment** (2-3 sentences): What the trading signals indicate and the likelihood of informed trading.
 
-Do NOT recommend buying or selling positions on Polymarket itself. Focus exclusively on traditional financial markets.`;
+2. **Trade Recommendations**: Give 2-3 specific real-world trades. For EACH trade, provide ALL of the following in a structured format:
+   - **Instrument**: Exact ticker symbol and full name (e.g., "GLD - SPDR Gold Trust ETF", "CL1! - WTI Crude Oil Futures", "LMT - Lockheed Martin", "EUR/USD")
+   - **Direction**: BUY (long) or SELL (short)
+   - **Entry Price**: The specific price to enter at (use current approximate market price based on your knowledge — state "approx." if estimating)
+   - **Target Price**: Specific profit target price
+   - **Stop Loss**: Specific stop-loss price to limit downside
+   - **Timeframe**: How long to hold — give a specific duration (e.g., "2-4 weeks", "hold through June 2026 expiry") and when to exit if the thesis hasn't played out
+   - **Thesis**: 1-2 sentences connecting this prediction market's insider signal to why this specific asset should move
+
+For options trades, specify: ticker, call/put, approximate strike price, expiration month, and whether to buy or sell the contract.
+
+Do NOT recommend Polymarket positions. Traditional financial markets only — stocks, ETFs, futures (oil, gold, silver, nat gas, agricultural), forex pairs, options, bonds/treasuries.`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 1024,
+        max_tokens: 2048,
         messages: [{ role: "user", content: prompt }],
       });
 
@@ -217,22 +227,35 @@ Do NOT recommend buying or selling positions on Polymarket itself. Focus exclusi
         ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
         : "";
 
-      const prompt = `You are a prediction market surveillance analyst and macro strategist. Below are the top ${input.markets.length} markets ranked by anomaly score from Polymarket.${categoryContext}
+      const prompt = `You are a prediction market surveillance analyst and macro trading strategist. Below are the top ${input.markets.length} markets ranked by anomaly score from Polymarket.${categoryContext}
 
 ${marketSummaries}
 
-Give your TOP 3 PICKS only. For each pick:
-- **Market**: Name the prediction market and its anomaly score
-- **Insider Signal**: Why it looks like insider trading — what specific combination of volume spike, concentration, price movement, and timing is suspicious (2-3 sentences, no filler)
-- **Real-World Trades**: Suggest 1-2 specific trades in traditional financial markets (stocks, ETFs, commodities futures like oil/gold/silver, forex pairs, options) that would profit if the insider thesis is correct. Name tickers, direction (long/short), and the logic. Think: defense stocks if military conflict signals, oil futures if energy policy leaks, currency pairs if political instability, sector ETFs, specific equities, etc.
+Give your TOP 3 PICKS. For each pick, provide:
 
-Do NOT recommend buying or selling positions on Polymarket. Focus exclusively on actionable real-world trades.
+**1. Market & Signal**
+- Name the prediction market and its anomaly score
+- 2-3 sentences on why it looks like insider trading: what specific combination of volume spike, concentration, price movement, and timing is suspicious
 
-End with one sentence on any cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} and a macro trade idea if you see one.`;
+**2. Exact Trade Recommendation**
+For each pick, give ONE primary trade with ALL of these details:
+- **Instrument**: Exact ticker and full name (e.g., "GLD - SPDR Gold Trust ETF", "CL1! - WTI Crude Oil Futures", "RTX - RTX Corporation", "EUR/USD")
+- **Direction**: BUY (long) or SELL (short)
+- **Entry Price**: Specific price to buy/sell at (use approximate current market price — state "approx." if estimating)
+- **Target Price**: Where to take profit
+- **Stop Loss**: Where to cut losses
+- **Timeframe**: Specific hold duration (e.g., "2-4 weeks", "exit by June 30 2026") and when to bail if the thesis fails
+- **Risk/Reward**: Expected % gain vs % loss
+
+For options: specify ticker, call/put, strike price, expiration month, buy/sell.
+
+Do NOT recommend Polymarket positions. Traditional markets only — stocks, ETFs, futures (oil, gold, silver, nat gas), forex, options, bonds.
+
+End with a **Macro View** section: one cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} and a portfolio-level hedge or macro trade with the same structured format (instrument, direction, entry, target, stop, timeframe).`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 1200,
+        max_tokens: 2048,
         messages: [{ role: "user", content: prompt }],
       });
 
