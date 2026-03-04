@@ -5,6 +5,12 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 
 function getAnthropicClient() {
+  if (process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY && process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
+    return new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+  }
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not configured. Please add your Anthropic API key in the Secrets tab.");
