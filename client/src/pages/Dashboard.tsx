@@ -36,9 +36,9 @@ export default function Dashboard() {
     }
 
     if (severityFilter === "critical") {
-      result = result.filter(m => m.riskProfile.score >= 63);
+      result = result.filter(m => m.riskProfile.score >= 70);
     } else if (severityFilter === "high") {
-      result = result.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63);
+      result = result.filter(m => m.riskProfile.score >= 62 && m.riskProfile.score < 70);
     }
 
     return result;
@@ -61,8 +61,8 @@ export default function Dashboard() {
     return result;
   }, [markets, activeCategory]);
 
-  const critical = allFiltered.filter(m => m.riskProfile.score >= 63).length;
-  const high = allFiltered.filter(m => m.riskProfile.score >= 58 && m.riskProfile.score < 63).length;
+  const critical = allFiltered.filter(m => m.riskProfile.score >= 70).length;
+  const high = allFiltered.filter(m => m.riskProfile.score >= 62 && m.riskProfile.score < 70).length;
   const totalVol = allFiltered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
 
   const handleRecommend = () => {

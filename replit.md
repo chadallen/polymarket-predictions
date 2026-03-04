@@ -56,7 +56,7 @@ Server uses events API (`/events`) which provides tags; `TAG_TO_CATEGORY` map in
 ### Design
 - Dark terminal aesthetic: #0a0a14 background
 - JetBrains Mono for data, IBM Plex Sans for body
-- Color coding: red (63+ critical), orange (58+ high), yellow (30+ moderate), green (low)
+- Color coding: red (70+ critical), orange (62+ high), yellow (30+ moderate), green (low)
 - Critical/High counts in header are clickable to filter by severity
 - Glow effects (red, orange, yellow, green, blue)
 - Mobile-first feed layout

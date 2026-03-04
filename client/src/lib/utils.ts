@@ -19,15 +19,15 @@ export function formatCents(value: number) {
 }
 
 export function getScoreColor(score: number) {
-  if (score >= 63) return "text-[hsl(var(--dw-red))]";
-  if (score >= 58) return "text-[hsl(var(--dw-orange))]";
+  if (score >= 70) return "text-[hsl(var(--dw-red))]";
+  if (score >= 62) return "text-[hsl(var(--dw-orange))]";
   if (score >= 30) return "text-[hsl(var(--dw-yellow))]";
   return "text-[hsl(var(--dw-green))]";
 }
 
 export function getScoreBg(score: number) {
-  if (score >= 63) return "bg-[hsl(var(--dw-red))]/10 border-[hsl(var(--dw-red))]/30";
-  if (score >= 58) return "bg-[hsl(var(--dw-orange))]/10 border-[hsl(var(--dw-orange))]/30";
+  if (score >= 70) return "bg-[hsl(var(--dw-red))]/10 border-[hsl(var(--dw-red))]/30";
+  if (score >= 62) return "bg-[hsl(var(--dw-orange))]/10 border-[hsl(var(--dw-orange))]/30";
   if (score >= 30) return "bg-[hsl(var(--dw-yellow))]/10 border-[hsl(var(--dw-yellow))]/30";
   return "bg-[hsl(var(--dw-green))]/10 border-[hsl(var(--dw-green))]/30";
 }
