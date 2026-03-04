@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { marked } from "marked";
 import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
@@ -8,29 +8,15 @@ import { useRecommend } from "@/hooks/use-recommend";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
 import { type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
-import { AlertCircle, Search, X, Sparkles, Terminal } from "lucide-react";
+import { AlertCircle, X, Sparkles, Terminal } from "lucide-react";
 
 export default function Dashboard() {
   const [weights, setWeights] = useState<ScoringWeights>({ ...DEFAULT_WEIGHTS });
   const [scoringOpen, setScoringOpen] = useState(false);
   const { data: markets, isLoading, isError } = useMarkets(weights);
-  const [search, setSearch] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<"critical" | "high" | null>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const recommendMutation = useRecommend();
-
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  const closeSearch = () => {
-    setSearch("");
-    setSearchOpen(false);
-  };
 
   const toggleCategory = (id: string) => {
     setActiveCategory(prev => prev === id ? null : id);
@@ -42,12 +28,6 @@ export default function Dashboard() {
 
   const filtered = useMemo(() => {
     let result = markets || [];
-
-    if (search) {
-      result = result.filter(m =>
-        m.question.toLowerCase().includes(search.toLowerCase())
-      );
-    }
 
     if (activeCategory) {
       result = result.filter(m =>
@@ -62,12 +42,10 @@ export default function Dashboard() {
     }
 
     return result;
-  }, [markets, search, activeCategory, severityFilter]);
+  }, [markets, activeCategory, severityFilter]);
 
   const categoryCounts = useMemo(() => {
-    const searchFiltered = (markets || []).filter(m =>
-      !search || m.question.toLowerCase().includes(search.toLowerCase())
-    );
+    const searchFiltered = markets || [];
     const counts: Record<string, number> = {};
     for (const cat of CATEGORIES) {
       counts[cat.id] = searchFiltered.filter(m => m.categories.includes(cat.id)).length;
@@ -191,42 +169,7 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
-
-                <button
-                  data-testid="button-search-toggle"
-                  onClick={() => searchOpen ? closeSearch() : setSearchOpen(true)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded border text-xs font-mono-data uppercase tracking-wider transition-colors ${
-                    searchOpen || search
-                      ? "border-[hsl(var(--dw-blue))]/40 text-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/5"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
-                  }`}
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  Search
-                </button>
               </div>
-
-              {searchOpen && (
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                  <input
-                    ref={searchInputRef}
-                    data-testid="input-search"
-                    type="text"
-                    placeholder="Filter markets..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="w-full bg-card border border-border rounded pl-7 pr-8 py-1.5 text-xs font-mono-data focus:outline-none focus:border-[hsl(var(--dw-blue))]/40 transition-colors"
-                  />
-                  <button
-                    data-testid="button-search-close"
-                    onClick={closeSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
 
               <div className="flex items-center gap-2">
                 <button
