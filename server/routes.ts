@@ -150,8 +150,7 @@ export async function registerRoutes(
     try {
       const input = api.analyze.create.input.parse(req.body);
 
-      const prompt = `
-Please analyze this prediction market for potential insider trading or unusual activity.
+      const prompt = `You are a prediction market surveillance analyst and macro strategist. Analyze this market for potential insider trading or unusual activity, then suggest real-world trades that could capitalize on the same thesis.
 
 Market ID: ${input.marketId}
 Title: ${input.title}
@@ -164,8 +163,11 @@ ${input.flags.map(f => `- ${f.name} (${f.severity}, ${f.points} pts)`).join('\n'
 Recent Trades:
 ${input.recentTrades?.map(t => `- ${t.side} ${t.size} shares @ $${t.price} (at ${t.timestamp})`).join('\n') || 'None'}
 
-Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly risk and what the trading signals might indicate.
-`;
+Provide:
+1. A brief intelligence-style assessment (2-3 sentences) of the anomaly risk and what the trading signals might indicate.
+2. Under a "**Real-World Trade Ideas**" heading, suggest 2-3 specific real-world trades (stocks, ETFs, commodities futures, forex pairs, options strategies) that would benefit if the insider thesis is correct. Be specific — name tickers, direction (long/short), and the logic connecting the prediction market signal to the real-world asset. Think oil futures, gold, defense stocks, currency pairs, sector ETFs, individual equities, etc.
+
+Do NOT recommend buying or selling positions on Polymarket itself. Focus exclusively on traditional financial markets.`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
@@ -215,22 +217,22 @@ Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly
         ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
         : "";
 
-      const prompt = `You are a prediction market surveillance analyst hunting for insider trading on Polymarket. Below are the top ${input.markets.length} markets ranked by anomaly score.${categoryContext}
+      const prompt = `You are a prediction market surveillance analyst and macro strategist. Below are the top ${input.markets.length} markets ranked by anomaly score from Polymarket.${categoryContext}
 
 ${marketSummaries}
 
 Give your TOP 3 PICKS only. For each pick:
-- Market name
-- Why it looks like insider trading: what specific combination of volume spike, concentration, price movement, and timing is suspicious
-- What the "informed bet" would be (which outcome, at what price)
+- **Market**: Name the prediction market and its anomaly score
+- **Insider Signal**: Why it looks like insider trading — what specific combination of volume spike, concentration, price movement, and timing is suspicious (2-3 sentences, no filler)
+- **Real-World Trades**: Suggest 1-2 specific trades in traditional financial markets (stocks, ETFs, commodities futures like oil/gold/silver, forex pairs, options) that would profit if the insider thesis is correct. Name tickers, direction (long/short), and the logic. Think: defense stocks if military conflict signals, oil futures if energy policy leaks, currency pairs if political instability, sector ETFs, specific equities, etc.
 
-Keep it tight — 2-3 sentences per pick, no filler. Focus on the smoking gun: abnormal volume surges into illiquid markets, one-sided flow, sudden price dislocations before known events. Skip markets that are just popular.
+Do NOT recommend buying or selling positions on Polymarket. Focus exclusively on actionable real-world trades.
 
-End with one sentence on any cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} if you see one.`;
+End with one sentence on any cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} and a macro trade idea if you see one.`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 800,
+        max_tokens: 1200,
         messages: [{ role: "user", content: prompt }],
       });
 
