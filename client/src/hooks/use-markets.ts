@@ -3,23 +3,6 @@ import { useMemo } from "react";
 import { calculateMarketRisk, type MarketRiskProfile, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { classifyMarket } from "@/lib/categories";
 
-const GEO_KEYWORDS = [
-  'war', 'military', 'sanctions', 'tariff', 'election', 'president',
-  'ceasefire', 'nuclear', 'iran', 'russia', 'ukraine', 'china', 'taiwan',
-  'north korea', 'israel', 'gaza', 'opec', 'oil', 'nato', 'troops',
-  'missile', 'coup', 'treaty', 'diplomacy', 'summit', 'pentagon',
-  'kremlin', 'drone', 'cyber', 'hack', 'espionage', 'border', 'territory',
-  'assassination', 'putin', 'zelensky', 'biden', 'trump', 'invasion',
-  'conflict', 'weapon', 'defense', 'intelligence', 'rebel', 'insurgent',
-  'blockade', 'embargo', 'annexation', 'occupation', 'hostage', 'terrorism',
-  'airstrike', 'bombing', 'chemical', 'biological', 'submarine', 'navy',
-  'army', 'air force', 'militia', 'mercenary', 'wagner', 'hezbollah',
-  'hamas', 'houthi', 'cartel', 'refugee', 'humanitarian', 'genocide',
-  'ethnic', 'separatist', 'secession', 'sovereignty', 'geopolitical',
-  'regime', 'dictator', 'authoritarian', 'democratic', 'vote', 'ballot',
-  'parliament', 'congress', 'senate', 'cabinet', 'minister', 'ambassador'
-];
-
 export interface PolymarketData {
   id: string;
   question: string;
@@ -77,17 +60,14 @@ function getMockRawMarkets(): RawMarket[] {
 
 function useRawMarkets() {
   return useQuery({
-    queryKey: ["markets", "geo-filtered"],
+    queryKey: ["markets", "all"],
     queryFn: async (): Promise<RawMarket[]> => {
       try {
         const res = await fetch("/api/markets");
         if (!res.ok) throw new Error("Failed to fetch markets");
         const data = await res.json();
 
-        const geoPattern = new RegExp(`\\b(${GEO_KEYWORDS.join('|')})\\b`, 'i');
-
-        const filtered: RawMarket[] = data
-          .filter((m: any) => geoPattern.test(m.question || ''))
+        const markets: RawMarket[] = data
           .map((m: any) => {
             let outcomes = m.outcomes;
             let outcomePrices = m.outcomePrices;
@@ -104,8 +84,8 @@ function useRawMarkets() {
             };
           });
 
-        if (filtered.length === 0) return getMockRawMarkets();
-        return filtered;
+        if (markets.length === 0) return getMockRawMarkets();
+        return markets;
       } catch (e) {
         console.warn("Falling back to simulated data due to API error", e);
         return getMockRawMarkets();

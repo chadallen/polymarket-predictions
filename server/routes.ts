@@ -71,7 +71,7 @@ ${input.flags.map(f => `- ${f.name} (${f.severity}, ${f.points} pts)`).join('\n'
 Recent Trades:
 ${input.recentTrades?.map(t => `- ${t.side} ${t.size} shares @ $${t.price} (at ${t.timestamp})`).join('\n') || 'None'}
 
-Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly risk, treating the data as geopolitical signals.
+Provide a brief, intelligence-style assessment (max 3 paragraphs) of the anomaly risk and what the trading signals might indicate.
 `;
 
       const response = await getAnthropicClient().messages.create({
