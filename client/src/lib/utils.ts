@@ -19,16 +19,16 @@ export function formatCents(value: number) {
 }
 
 export function getScoreColor(score: number) {
-  if (score >= 60) return "text-[hsl(var(--dw-red))]";
-  if (score >= 35) return "text-[hsl(var(--dw-orange))]";
-  if (score >= 15) return "text-[hsl(var(--dw-yellow))]";
+  if (score >= 70) return "text-[hsl(var(--dw-red))]";
+  if (score >= 55) return "text-[hsl(var(--dw-orange))]";
+  if (score >= 25) return "text-[hsl(var(--dw-yellow))]";
   return "text-[hsl(var(--dw-green))]";
 }
 
 export function getScoreBg(score: number) {
-  if (score >= 60) return "bg-[hsl(var(--dw-red))]/10 border-[hsl(var(--dw-red))]/30";
-  if (score >= 35) return "bg-[hsl(var(--dw-orange))]/10 border-[hsl(var(--dw-orange))]/30";
-  if (score >= 15) return "bg-[hsl(var(--dw-yellow))]/10 border-[hsl(var(--dw-yellow))]/30";
+  if (score >= 70) return "bg-[hsl(var(--dw-red))]/10 border-[hsl(var(--dw-red))]/30";
+  if (score >= 55) return "bg-[hsl(var(--dw-orange))]/10 border-[hsl(var(--dw-orange))]/30";
+  if (score >= 25) return "bg-[hsl(var(--dw-yellow))]/10 border-[hsl(var(--dw-yellow))]/30";
   return "bg-[hsl(var(--dw-green))]/10 border-[hsl(var(--dw-green))]/30";
 }
 

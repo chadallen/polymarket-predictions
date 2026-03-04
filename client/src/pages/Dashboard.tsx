@@ -61,8 +61,8 @@ export default function Dashboard() {
     return counts;
   }, [markets, search]);
 
-  const critical = filtered.filter(m => m.riskProfile.score >= 60).length;
-  const high = filtered.filter(m => m.riskProfile.score >= 35 && m.riskProfile.score < 60).length;
+  const critical = filtered.filter(m => m.riskProfile.score >= 70).length;
+  const high = filtered.filter(m => m.riskProfile.score >= 55 && m.riskProfile.score < 70).length;
   const totalVol = filtered.reduce((s, m) => s + parseFloat(m.volume24hr || "0"), 0);
 
   return (
