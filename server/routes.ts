@@ -243,18 +243,22 @@ Reply in this exact format, be brief:
         ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
         : "";
 
-      const prompt = `Top ${input.markets.length} anomaly-scored prediction markets from Polymarket.${categoryContext}
+      const prompt = `Prediction market surveillance. Pick the ONE best insider trading signal from the top ${input.markets.length} markets.${categoryContext}
 
 ${marketSummaries}
 
-Pick the ONE most suspicious market — the single best insider trading signal. Be brief:
+Reply in this exact format, be brief:
 
-**Top Pick: [Market Name]** (Score X)
-- 2-3 sentences on why this is the strongest insider signal
-- **Trade**: Ticker - Name, BUY/SELL, Entry, Target, Stop, Timeframe
-- **Why**: 1 sentence connecting the insider signal to the trade
+**Signal**: 1-2 sentences on which market looks most suspicious and why (name the market and score).
 
-No Polymarket positions. Traditional markets only (stocks, ETFs, futures, forex, options).`;
+**Trade**: ONE real-world trade (no Polymarket positions):
+- **Instrument**: Ticker - Name
+- **Direction**: BUY or SELL
+- **Entry**: price (approx.)
+- **Target**: price
+- **Stop**: price
+- **Timeframe**: duration
+- **Why**: 1 sentence linking the insider signal to the trade`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-haiku-4-5",
