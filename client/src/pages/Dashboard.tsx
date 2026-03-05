@@ -71,11 +71,11 @@ export default function Dashboard() {
     if (activeCategory) {
       pool = pool.filter(m => m.categories.includes(activeCategory));
     }
-    const top25 = pool.slice(0, 25);
-    if (top25.length === 0) return;
+    const top3 = pool.slice(0, 3);
+    if (top3.length === 0) return;
     recommendMutation.mutate({
       activeCategory: activeCategory || null,
-      markets: top25.map(m => ({
+      markets: top3.map(m => ({
         question: m.question,
         score: m.riskProfile.score,
         volume24hr: m.volume24hr || "0",

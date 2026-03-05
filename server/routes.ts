@@ -247,20 +247,18 @@ Reply in this exact format, be brief:
 
 ${marketSummaries}
 
-Pick the TOP 3 most suspicious. For each, be brief:
+Pick the ONE most suspicious market — the single best insider trading signal. Be brief:
 
-**Pick N: [Market Name]** (Score X)
-- 1 sentence on why it looks like insider trading
+**Top Pick: [Market Name]** (Score X)
+- 2-3 sentences on why this is the strongest insider signal
 - **Trade**: Ticker - Name, BUY/SELL, Entry, Target, Stop, Timeframe
-- **Why**: 1 sentence
-
-End with **Macro View**: 1 cross-market pattern${input.activeCategory ? ` in ${input.activeCategory}` : ""}, one hedge trade (Ticker, direction, entry, target, stop, timeframe).
+- **Why**: 1 sentence connecting the insider signal to the trade
 
 No Polymarket positions. Traditional markets only (stocks, ETFs, futures, forex, options).`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-haiku-4-5",
-        max_tokens: 1024,
+        max_tokens: 512,
         messages: [{ role: "user", content: prompt }],
       });
 
