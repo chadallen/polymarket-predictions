@@ -98,6 +98,21 @@ export async function registerRoutes(
 
       const EXCLUDED_TAGS = new Set(["sports", "nba", "nfl", "mlb", "nhl", "soccer", "basketball", "football", "baseball", "tennis", "golf", "boxing", "mma", "ufc", "f1", "cricket", "rugby", "nba finals", "nba champion", "premier league", "champions league", "la liga", "serie a", "world cup", "super bowl", "march madness", "olympics"]);
 
+      const EXCLUDED_QUESTION_PATTERNS = [
+        /how many (tweets|posts|times)/i,
+        /number of (tweets|posts)/i,
+        /tweet.*more than/i,
+        /post.*more than/i,
+        /will .+ (say|tweet|post) .+ (word|phrase|term)/i,
+        /will .+ say ['"]?\w+['"]?/i,
+        /say the word/i,
+        /mention .+ in (a |his |her )?(tweet|post|speech)/i,
+      ];
+
+      function isExcludedQuestion(question: string): boolean {
+        return EXCLUDED_QUESTION_PATTERNS.some(p => p.test(question));
+      }
+
       for (const page of pages) {
         if (!page.ok) continue;
         const events = await page.json();
@@ -111,6 +126,7 @@ export async function registerRoutes(
             if (seenIds.has(market.id)) continue;
             if (!market.active || market.closed) continue;
             if (market.endDate && new Date(market.endDate) < new Date()) continue;
+            if (isExcludedQuestion(market.question || "")) continue;
             seenIds.add(market.id);
             allMarkets.push({
               ...market,
