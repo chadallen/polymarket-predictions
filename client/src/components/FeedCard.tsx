@@ -57,10 +57,10 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
     <div
       data-testid={`feed-card-${market.id}`}
       className={cn(
-        "border rounded-md lg:rounded-lg",
-        score >= 70 ? "border-[hsl(var(--dw-red))]/30 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/[0.03] lg:bg-[hsl(var(--dw-red))]/20" :
-        score >= 62 ? "border-[hsl(var(--dw-orange))]/20 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/[0.02] lg:bg-[hsl(var(--dw-orange))]/15" :
-        "border-border bg-card/40 lg:bg-card"
+        "border rounded-md lg:rounded-lg transition-all duration-150 group/card",
+        score >= 70 ? "border-[hsl(var(--dw-red))]/30 lg:border-[hsl(var(--dw-red))] bg-[hsl(var(--dw-red))]/[0.03] lg:bg-[hsl(var(--dw-red))]/20 hover:bg-[hsl(var(--dw-red))]/[0.06] lg:hover:bg-[hsl(var(--dw-red))]/25" :
+        score >= 62 ? "border-[hsl(var(--dw-orange))]/20 lg:border-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/[0.02] lg:bg-[hsl(var(--dw-orange))]/15 hover:bg-[hsl(var(--dw-orange))]/[0.05] lg:hover:bg-[hsl(var(--dw-orange))]/20" :
+        "border-border bg-card/40 lg:bg-card hover:bg-card/60 lg:hover:bg-card/80"
       )}
     >
       <div
@@ -86,7 +86,16 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
               {isMock && <span className="text-[9px] lg:text-xs font-label text-muted-foreground bg-muted px-1 py-0.5 rounded mr-1.5 uppercase">Simulated</span>}
               {market.question}
             </p>
-            {expanded ? <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 shrink-0 text-muted-foreground mt-0.5" /> : <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 shrink-0 text-muted-foreground mt-0.5" />}
+            <div className="shrink-0 flex flex-col items-center gap-0.5 mt-0.5">
+              {expanded ? (
+                <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground group-hover/card:text-foreground transition-colors" />
+              ) : (
+                <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground group-hover/card:text-foreground transition-colors animate-[bounce_2s_ease-in-out_3]" />
+              )}
+              {!expanded && (
+                <span className="text-[8px] lg:text-[9px] font-label text-muted-foreground/50 group-hover/card:text-muted-foreground uppercase leading-none transition-colors hidden lg:block">Details</span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 lg:gap-4 mt-2 lg:mt-3 flex-wrap">
