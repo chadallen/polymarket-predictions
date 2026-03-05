@@ -175,38 +175,29 @@ export async function registerRoutes(
     try {
       const input = api.analyze.create.input.parse(req.body);
 
-      const prompt = `You are a prediction market surveillance analyst and macro trading strategist. Analyze this market for insider trading signals, then give exact real-world trade recommendations.
+      const prompt = `Prediction market surveillance. Analyze for insider trading, give ONE best trade.
 
-Market ID: ${input.marketId}
-Title: ${input.title}
-Description: ${input.description}
-Insider Score: ${input.score}/99
+"${input.title}" — Score: ${input.score}/99
+${input.description}
+Flags: ${input.flags.map(f => `${f.name} (${f.severity})`).join(', ')}
+Trades: ${input.recentTrades?.slice(0, 5).map(t => `${t.side} ${t.size}@$${t.price}`).join(', ') || 'None'}
 
-Detection Flags:
-${input.flags.map(f => `- ${f.name} (${f.severity}, ${f.points} pts)`).join('\n')}
+Reply in this exact format, be brief:
 
-Recent Trades:
-${input.recentTrades?.map(t => `- ${t.side} ${t.size} shares @ $${t.price} (at ${t.timestamp})`).join('\n') || 'None'}
+**Signal**: 1-2 sentences on what looks suspicious.
 
-Provide:
-1. **Anomaly Assessment** (2-3 sentences): What the trading signals indicate and the likelihood of informed trading.
-
-2. **Trade Recommendations**: Give 2-3 specific real-world trades. For EACH trade, provide ALL of the following in a structured format:
-   - **Instrument**: Exact ticker symbol and full name (e.g., "GLD - SPDR Gold Trust ETF", "CL1! - WTI Crude Oil Futures", "LMT - Lockheed Martin", "EUR/USD")
-   - **Direction**: BUY (long) or SELL (short)
-   - **Entry Price**: The specific price to enter at (use current approximate market price based on your knowledge — state "approx." if estimating)
-   - **Target Price**: Specific profit target price
-   - **Stop Loss**: Specific stop-loss price to limit downside
-   - **Timeframe**: How long to hold — give a specific duration (e.g., "2-4 weeks", "hold through June 2026 expiry") and when to exit if the thesis hasn't played out
-   - **Thesis**: 1-2 sentences connecting this prediction market's insider signal to why this specific asset should move
-
-For options trades, specify: ticker, call/put, approximate strike price, expiration month, and whether to buy or sell the contract.
-
-Do NOT recommend Polymarket positions. Traditional financial markets only — stocks, ETFs, futures (oil, gold, silver, nat gas, agricultural), forex pairs, options, bonds/treasuries.`;
+**Trade**: ONE real-world trade (no Polymarket positions):
+- **Instrument**: Ticker - Name
+- **Direction**: BUY or SELL
+- **Entry**: price (approx.)
+- **Target**: price
+- **Stop**: price
+- **Timeframe**: duration
+- **Why**: 1 sentence linking the insider signal to the trade`;
 
       const response = await getAnthropicClient().messages.create({
-        model: "claude-sonnet-4-6",
-        max_tokens: 2048,
+        model: "claude-haiku-4-5-20250901",
+        max_tokens: 512,
         messages: [{ role: "user", content: prompt }],
       });
 
@@ -252,35 +243,24 @@ Do NOT recommend Polymarket positions. Traditional financial markets only — st
         ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
         : "";
 
-      const prompt = `You are a prediction market surveillance analyst and macro trading strategist. Below are the top ${input.markets.length} markets ranked by anomaly score from Polymarket.${categoryContext}
+      const prompt = `Top ${input.markets.length} anomaly-scored prediction markets from Polymarket.${categoryContext}
 
 ${marketSummaries}
 
-Give your TOP 3 PICKS. For each pick, provide:
+Pick the TOP 3 most suspicious. For each, be brief:
 
-**1. Market & Signal**
-- Name the prediction market and its anomaly score
-- 2-3 sentences on why it looks like insider trading: what specific combination of volume spike, concentration, price movement, and timing is suspicious
+**Pick N: [Market Name]** (Score X)
+- 1 sentence on why it looks like insider trading
+- **Trade**: Ticker - Name, BUY/SELL, Entry, Target, Stop, Timeframe
+- **Why**: 1 sentence
 
-**2. Exact Trade Recommendation**
-For each pick, give ONE primary trade with ALL of these details:
-- **Instrument**: Exact ticker and full name (e.g., "GLD - SPDR Gold Trust ETF", "CL1! - WTI Crude Oil Futures", "RTX - RTX Corporation", "EUR/USD")
-- **Direction**: BUY (long) or SELL (short)
-- **Entry Price**: Specific price to buy/sell at (use approximate current market price — state "approx." if estimating)
-- **Target Price**: Where to take profit
-- **Stop Loss**: Where to cut losses
-- **Timeframe**: Specific hold duration (e.g., "2-4 weeks", "exit by June 30 2026") and when to bail if the thesis fails
-- **Risk/Reward**: Expected % gain vs % loss
+End with **Macro View**: 1 cross-market pattern${input.activeCategory ? ` in ${input.activeCategory}` : ""}, one hedge trade (Ticker, direction, entry, target, stop, timeframe).
 
-For options: specify ticker, call/put, strike price, expiration month, buy/sell.
-
-Do NOT recommend Polymarket positions. Traditional markets only — stocks, ETFs, futures (oil, gold, silver, nat gas), forex, options, bonds.
-
-End with a **Macro View** section: one cross-market pattern${input.activeCategory ? ` within ${input.activeCategory}` : ""} and a portfolio-level hedge or macro trade with the same structured format (instrument, direction, entry, target, stop, timeframe).`;
+No Polymarket positions. Traditional markets only (stocks, ETFs, futures, forex, options).`;
 
       const response = await getAnthropicClient().messages.create({
-        model: "claude-sonnet-4-6",
-        max_tokens: 2048,
+        model: "claude-haiku-4-5-20250901",
+        max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       });
 
