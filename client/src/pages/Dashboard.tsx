@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [weights, setWeights] = useState<ScoringWeights>({ ...DEFAULT_WEIGHTS });
   const [scoringOpen, setScoringOpen] = useState(false);
   const { data: markets, isLoading, isError } = useMarkets(weights);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>("politics");
   const [severityFilter, setSeverityFilter] = useState<"critical" | "high" | null>(null);
   const recommendMutation = useRecommend();
 
