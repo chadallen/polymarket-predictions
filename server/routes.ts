@@ -196,7 +196,7 @@ Reply in this exact format, be brief:
 - **Why**: 1 sentence linking the insider signal to the trade`;
 
       const response = await getAnthropicClient().messages.create({
-        model: "claude-sonnet-4-5-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 512,
         messages: [{ role: "user", content: prompt }],
       });
@@ -259,7 +259,7 @@ End with **Macro View**: 1 cross-market pattern${input.activeCategory ? ` in ${i
 No Polymarket positions. Traditional markets only (stocks, ETFs, futures, forex, options).`;
 
       const response = await getAnthropicClient().messages.create({
-        model: "claude-sonnet-4-5-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       });
