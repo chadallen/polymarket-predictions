@@ -102,7 +102,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             </div>
           </div>
 
-          <div className="flex items-center gap-3 lg:gap-4 mt-2 lg:mt-3 flex-wrap">
+          <div className="flex items-center gap-3 lg:gap-4 mt-1 lg:mt-3 flex-wrap">
             <span className={cn(
               "text-[10px] lg:text-xs px-1.5 lg:px-2 py-0.5 lg:py-1 rounded font-label font-semibold uppercase",
               score >= 70 ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
@@ -112,19 +112,19 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             )}>
               {severityLabel}
             </span>
-            <span className="text-[11px] lg:text-sm font-mono-data lg:font-semibold text-muted-foreground">{formatCurrency(vol24)}/24h</span>
+            <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">{formatCurrency(vol24)}/24h</span>
             {market.riskProfile.volumeSpikeRatio > 1.5 && (
-              <span className="text-[11px] lg:text-sm font-mono-data text-[hsl(var(--dw-orange))]">
+              <span className="hidden lg:inline text-sm font-mono-data text-[hsl(var(--dw-orange))]">
                 {market.riskProfile.volumeSpikeRatio.toFixed(1)}x spike
               </span>
             )}
             {topPrice !== null && (
-              <span className="text-[11px] lg:text-sm font-mono-data lg:font-semibold text-muted-foreground">
+              <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">
                 {topOutcome} {formatCents(topPrice)}
               </span>
             )}
             {flags.length > 0 && (
-              <span className="text-[11px] lg:text-sm font-mono-data lg:font-semibold text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
+              <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
             )}
             {market.categories.filter(c => c !== "other").map(catId => {
               const cat = CATEGORIES.find(c => c.id === catId);
