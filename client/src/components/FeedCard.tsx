@@ -88,12 +88,16 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             </p>
             <div className="shrink-0 flex flex-col items-center gap-0.5 mt-0.5">
               {expanded ? (
-                <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground group-hover/card:text-foreground transition-colors" />
+                <div className="w-6 h-6 lg:w-7 lg:h-7 rounded bg-foreground/5 lg:bg-foreground/10 group-hover/card:bg-foreground/15 flex items-center justify-center transition-colors">
+                  <ChevronUp className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-foreground/70 group-hover/card:text-foreground transition-colors" />
+                </div>
               ) : (
-                <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground group-hover/card:text-foreground transition-colors animate-[bounce_2s_ease-in-out_3]" />
+                <div className="w-6 h-6 lg:w-7 lg:h-7 rounded bg-foreground/5 lg:bg-foreground/10 group-hover/card:bg-foreground/15 flex items-center justify-center transition-colors animate-[pulse_3s_ease-in-out_2]">
+                  <ChevronDown className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-foreground/70 group-hover/card:text-foreground transition-colors" />
+                </div>
               )}
               {!expanded && (
-                <span className="text-[8px] lg:text-[9px] font-label text-muted-foreground/50 group-hover/card:text-muted-foreground uppercase leading-none transition-colors hidden lg:block">Details</span>
+                <span className="text-[7px] lg:text-[9px] font-label text-muted-foreground/60 group-hover/card:text-muted-foreground uppercase leading-none transition-colors">Details</span>
               )}
             </div>
           </div>
