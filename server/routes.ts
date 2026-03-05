@@ -107,7 +107,7 @@ export async function registerRoutes(
         /how many .*(posts|times|videos)/i,
         /number of (posts|likes|followers|retweets|views)/i,
         /\b(elon|musk)\b/i,
-        /\b(tate|andrew tate)\b.*\b(post|video|stream)\b/i,
+        /andrew tate/i,
         /social media/i,
       ];
 
