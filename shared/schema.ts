@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const analyzeRequestSchema = z.object({
+export const analyzeMarketSchema = z.object({
   marketId: z.string(),
   title: z.string(),
   description: z.string(),
@@ -20,6 +20,10 @@ export const analyzeRequestSchema = z.object({
       timestamp: z.string(),
     })
   ).optional(),
+});
+
+export const analyzeRequestSchema = z.object({
+  markets: z.array(analyzeMarketSchema).min(1).max(5),
 });
 
 export type AnalyzeRequest = z.infer<typeof analyzeRequestSchema>;
