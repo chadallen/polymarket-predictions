@@ -175,17 +175,14 @@ export async function registerRoutes(
     try {
       const input = api.analyze.create.input.parse(req.body);
 
-      const marketsList = input.markets.map((m, i) =>
-        `${i + 1}. "${m.title}" — Score: ${m.score}/99\n   ${m.description}\n   Flags: ${m.flags.map(f => `${f.name} (${f.severity})`).join(', ')}\n   Trades: ${m.recentTrades?.slice(0, 5).map(t => `${t.side} ${t.size}@$${t.price}`).join(', ') || 'None'}`
-      ).join('\n\n');
+      const prompt = `Prediction market surveillance. Analyze for insider trading, give ONE best trade.
 
-      const prompt = `Prediction market surveillance. Here are the top ${input.markets.length} suspicious markets. Pick the ONE with the strongest insider signal and give ONE best trade.
-
-${marketsList}
+"${input.title}" — Score: ${input.score}/99
+${input.description}
+Flags: ${input.flags.map(f => `${f.name} (${f.severity})`).join(', ')}
+Trades: ${input.recentTrades?.slice(0, 5).map(t => `${t.side} ${t.size}@$${t.price}`).join(', ') || 'None'}
 
 Reply in this exact format, be brief:
-
-**Pick**: Name the market you chose and why (1 sentence).
 
 **Signal**: 1-2 sentences on what looks suspicious.
 
