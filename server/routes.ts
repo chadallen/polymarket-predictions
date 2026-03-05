@@ -99,14 +99,16 @@ export async function registerRoutes(
       const EXCLUDED_TAGS = new Set(["sports", "nba", "nfl", "mlb", "nhl", "soccer", "basketball", "football", "baseball", "tennis", "golf", "boxing", "mma", "ufc", "f1", "cricket", "rugby", "nba finals", "nba champion", "premier league", "champions league", "la liga", "serie a", "world cup", "super bowl", "march madness", "olympics"]);
 
       const EXCLUDED_QUESTION_PATTERNS = [
-        /how many (tweets|posts|times)/i,
-        /number of (tweets|posts)/i,
-        /tweet.*more than/i,
-        /post.*more than/i,
-        /will .+ (say|tweet|post) .+ (word|phrase|term)/i,
-        /will .+ say ['"]?\w+['"]?/i,
+        /tweet/i,
+        /\bpost(s|ing|ed)?\b.*\b(on|to|from)\b.*(x|twitter|truth social|instagram|facebook|social media)/i,
+        /\b(x|twitter|truth social)\b.*\bpost/i,
         /say the word/i,
-        /mention .+ in (a |his |her )?(tweet|post|speech)/i,
+        /will .+ say ['"]?\w+['"]?/i,
+        /how many .*(posts|times|videos)/i,
+        /number of (posts|likes|followers|retweets|views)/i,
+        /\b(elon|musk)\b.*\b(post|x\.com|reply|retweet)\b/i,
+        /\b(tate|andrew tate)\b.*\b(post|video|stream)\b/i,
+        /social media/i,
       ];
 
       function isExcludedQuestion(question: string): boolean {
