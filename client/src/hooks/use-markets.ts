@@ -71,7 +71,7 @@ function useRawMarkets() {
         const data = await res.json();
 
         const markets: RawMarket[] = data
-          .filter((m: any) => m.active !== false && m.closed !== true)
+          .filter((m: any) => m.active !== false && m.closed !== true && !(m.endDate && new Date(m.endDate) < new Date()))
           .map((m: any) => {
             let outcomes = m.outcomes;
             let outcomePrices = m.outcomePrices;

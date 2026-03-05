@@ -110,6 +110,7 @@ export async function registerRoutes(
           for (const market of (event.markets || [])) {
             if (seenIds.has(market.id)) continue;
             if (!market.active || market.closed) continue;
+            if (market.endDate && new Date(market.endDate) < new Date()) continue;
             seenIds.add(market.id);
             allMarkets.push({
               ...market,
