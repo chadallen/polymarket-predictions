@@ -243,14 +243,14 @@ Reply in this exact format, be brief:
         ? `\nThese markets are filtered to the "${input.activeCategory}" category. Focus your analysis specifically on insider trading patterns within ${input.activeCategory} markets.`
         : "";
 
-      const prompt = `Prediction market surveillance. Pick the ONE best insider trading signal from the top ${input.markets.length} markets.${categoryContext}
+      const prompt = `Prediction market surveillance. Pick the top 3 insider trading signals from the top ${input.markets.length} markets.${categoryContext}
 
 ${marketSummaries}
 
-Reply in this exact format, be brief:
+Reply in this exact format, be brief. Give exactly 3 picks:
 
+**Pick 1**
 **Signal**: 1-2 sentences on which market looks most suspicious and why (name the market and score).
-
 **Trade**: ONE real-world trade (no Polymarket positions):
 - **Instrument**: Ticker - Name
 - **Direction**: BUY or SELL
@@ -258,11 +258,17 @@ Reply in this exact format, be brief:
 - **Target**: price
 - **Stop**: price
 - **Timeframe**: duration
-- **Why**: 1 sentence linking the insider signal to the trade`;
+- **Why**: 1 sentence linking the insider signal to the trade
+
+**Pick 2**
+(same format)
+
+**Pick 3**
+(same format)`;
 
       const response = await getAnthropicClient().messages.create({
         model: "claude-haiku-4-5",
-        max_tokens: 512,
+        max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       });
 

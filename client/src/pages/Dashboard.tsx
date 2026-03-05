@@ -71,7 +71,7 @@ export default function Dashboard() {
     if (activeCategory) {
       pool = pool.filter(m => m.categories.includes(activeCategory));
     }
-    const top3 = pool.slice(0, 3);
+    const top3 = pool.slice(0, 10);
     if (top3.length === 0) return;
     recommendMutation.mutate({
       activeCategory: activeCategory || null,
