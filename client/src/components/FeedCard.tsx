@@ -21,13 +21,14 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
   const analyzeMutation = useAnalyze();
   const isMock = market.id.startsWith("mock-");
 
-  const enrichedProfile = useMemo(() => {
-    if (!trades || trades.length === 0) return market.riskProfile;
-    return enrichScoreWithTrades(market.riskProfile, trades, weights);
-  }, [market.riskProfile, trades, weights]);
+  const score = market.riskProfile.score;
+  const flags = market.riskProfile.flags;
 
-  const score = enrichedProfile.score;
-  const flags = enrichedProfile.flags;
+  const tradeFlags = useMemo(() => {
+    if (!trades || trades.length === 0) return [];
+    const enriched = enrichScoreWithTrades(market.riskProfile, trades, weights);
+    return enriched.flags.filter(f => !market.riskProfile.flags.some(bf => bf.name === f.name));
+  }, [market.riskProfile, trades, weights]);
 
   const severityLabel = score >= 70 ? "CRITICAL" : score >= 62 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
 
@@ -38,7 +39,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
       title: market.question,
       description: `Market ends: ${market.endDate}. Current volume: ${market.volume}`,
       score,
-      flags: flags.map(f => ({ name: f.name, severity: f.severity, points: f.points })),
+      flags: [...flags, ...tradeFlags].map(f => ({ name: f.name, severity: f.severity, points: f.points })),
       recentTrades: trades?.slice(0, 10).map(t => ({
         price: t.price,
         size: t.size,
@@ -190,6 +191,24 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                   </span>
                 </div>
               ))}
+              {tradeFlags.length > 0 && (
+                <>
+                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground/60 uppercase mt-2">Trade-Level Signals</span>
+                  {tradeFlags.map((flag, i) => (
+                    <div key={`tf-${i}`} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-dashed border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
+                      <span className="truncate mr-2">{flag.name}</span>
+                      <span className={cn(
+                        "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
+                        flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
+                        flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
+                        "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
+                      )}>
+                        {flag.severity} +{flag.points}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )}
 
