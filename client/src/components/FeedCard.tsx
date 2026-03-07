@@ -3,40 +3,33 @@ import { marked } from "marked";
 import { type DarkWatchMarket } from "@/hooks/use-markets";
 import { useTrades } from "@/hooks/use-trades";
 import { useAnalyze } from "@/hooks/use-analyze";
-import { enrichScoreWithTrades, type ScoringWeights, type VPINSignals, DEFAULT_WEIGHTS } from "@/lib/scoring";
+import { computeVPINScore, type VPINSignals } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { formatCurrency, formatCents, cn, getScoreColor, getScoreBg } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
-import { ChevronDown, ChevronUp, ExternalLink, TrendingUp, Activity, Zap, Terminal } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Activity, Terminal } from "lucide-react";
 
 interface FeedCardProps {
   market: DarkWatchMarket;
   rank: number;
-  weights?: ScoringWeights;
 }
 
-export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardProps) {
+export function FeedCard({ market, rank }: FeedCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { data: trades, isLoading: tradesLoading } = useTrades(expanded ? market.id : null);
   const analyzeMutation = useAnalyze();
   const isMock = market.id.startsWith("mock-");
 
-  const baseScore = market.riskProfile.score;
-  const flags = market.riskProfile.flags;
-
-  const vpinEnriched = useMemo(() => {
+  const vpinResult = useMemo(() => {
     if (!trades || trades.length === 0) return null;
-    return enrichScoreWithTrades(market.riskProfile, trades, weights);
-  }, [market.riskProfile, trades, weights]);
+    return computeVPINScore(trades);
+  }, [trades]);
 
-  const tradeFlags = useMemo(() => {
-    if (!vpinEnriched) return [];
-    return vpinEnriched.flags.filter(f => !market.riskProfile.flags.some(bf => bf.name === f.name));
-  }, [vpinEnriched, market.riskProfile]);
+  const vpinSignals: VPINSignals | undefined = vpinResult?.vpinSignals;
+  const vpinFlags = vpinResult?.flags || [];
 
-  const vpinSignals: VPINSignals | undefined = vpinEnriched?.vpinSignals;
-
-  const score = vpinEnriched ? vpinEnriched.score : baseScore;
+  const score = vpinResult ? vpinResult.score : market.riskProfile.score;
+  const isPreliminary = !vpinResult;
   const severityLabel = score >= 70 ? "CRITICAL" : score >= 62 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
 
   const handleAnalyze = (e: React.MouseEvent) => {
@@ -46,7 +39,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
       title: market.question,
       description: `Market ends: ${market.endDate}. Current volume: ${market.volume}`,
       score,
-      flags: [...flags, ...tradeFlags].map(f => ({ name: f.name, severity: f.severity, points: f.points })),
+      flags: vpinFlags.map(f => ({ name: f.name, severity: f.severity, points: f.points })),
       recentTrades: trades?.slice(0, 10).map(t => ({
         price: t.price,
         size: t.size,
@@ -57,7 +50,6 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
   };
 
   const vol24 = parseFloat(market.volume24hr || "0");
-  const volTotal = parseFloat(market.volume || "0");
   const topPrice = market.outcomePrices?.[0] ? parseFloat(market.outcomePrices[0]) : null;
   const topOutcome = market.outcomes?.[0] || "Yes";
 
@@ -86,6 +78,9 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           <span className={cn("font-mono-data font-bold text-lg lg:text-2xl leading-none", getScoreColor(score))}>
             {score}
           </span>
+          {isPreliminary && (
+            <span className="text-[6px] lg:text-[8px] font-label text-muted-foreground uppercase leading-none mt-0.5">est</span>
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -121,18 +116,15 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
               {severityLabel}
             </span>
             <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">{formatCurrency(vol24)}/24h</span>
-            {market.riskProfile.volumeSpikeRatio > 1.5 && (
-              <span className="hidden lg:inline text-sm font-mono-data text-[hsl(var(--dw-orange))]">
-                {market.riskProfile.volumeSpikeRatio.toFixed(1)}x spike
-              </span>
-            )}
             {topPrice !== null && (
               <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">
                 {topOutcome} {formatCents(topPrice)}
               </span>
             )}
-            {flags.length > 0 && (
-              <span className="hidden lg:inline text-sm font-mono-data font-semibold text-muted-foreground">{flags.length} flag{flags.length !== 1 ? 's' : ''}</span>
+            {vpinSignals && (
+              <span className="hidden lg:inline text-sm font-mono-data text-[hsl(var(--dw-orange))]">
+                VPIN {(vpinSignals.vpinCurrent * 100).toFixed(0)}%
+              </span>
             )}
             {market.categories.filter(c => c !== "other").map(catId => {
               const cat = CATEGORIES.find(c => c.id === catId);
@@ -158,42 +150,78 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
       {expanded && (
         <div className="px-4 lg:px-6 pb-4 lg:pb-6 space-y-4 lg:space-y-5 border-t border-border/50 lg:border-border pt-4 lg:pt-5">
 
-          <div className="flex items-center gap-4 lg:gap-8">
-            <ScoreGauge score={score} size={80} lgSize={100} />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 flex-1">
-              <Stat icon={<Activity className="w-3 h-3 lg:w-4 lg:h-4" />} label="24h Vol" value={formatCurrency(vol24)} />
-              <Stat icon={<TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" />} label="Spike" value={`${market.riskProfile.volumeSpikeRatio.toFixed(1)}x`} />
-              <Stat icon={<Activity className="w-3 h-3 lg:w-4 lg:h-4" />} label="Total Vol" value={formatCurrency(volTotal)} />
-              <Stat icon={<Zap className="w-3 h-3 lg:w-4 lg:h-4" />} label="Flags" value={`${flags.length}`} />
-            </div>
-          </div>
+          {vpinSignals ? (
+            <div className="space-y-3 lg:space-y-4">
+              <div className="flex items-center gap-3 lg:gap-5">
+                <ScoreGauge score={score} size={80} lgSize={100} />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Analysis</span>
+                    <span className={cn(
+                      "text-[9px] lg:text-[11px] px-1.5 py-0.5 rounded font-label uppercase",
+                      vpinSignals.confidence === "high" ? "bg-[hsl(var(--dw-green))]/15 text-[hsl(var(--dw-green))]" :
+                      vpinSignals.confidence === "medium" ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
+                      "bg-muted text-muted-foreground"
+                    )}>
+                      {vpinSignals.confidence} confidence ({vpinSignals.nTrades} trades)
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 lg:grid-cols-6 gap-1.5 lg:gap-2">
+                    <VPINStat label="VPIN Now" value={`${(vpinSignals.vpinCurrent * 100).toFixed(0)}%`} alert={vpinSignals.vpinCurrent >= 0.4} />
+                    <VPINStat label="VPIN Peak" value={`${(vpinSignals.vpinMax * 100).toFixed(0)}%`} alert={vpinSignals.vpinMax >= 0.5} />
+                    <VPINStat label="VPIN Avg" value={`${(vpinSignals.vpinMean * 100).toFixed(0)}%`} />
+                    <VPINStat label="Trend" value={vpinSignals.vpinTrend > 0 ? `+${(vpinSignals.vpinTrend * 100).toFixed(0)}%` : `${(vpinSignals.vpinTrend * 100).toFixed(0)}%`} alert={vpinSignals.vpinTrend > 0.2} />
+                    <VPINStat label="Vol Anomaly" value={`${(vpinSignals.volumeAnomaly * 100).toFixed(0)}%`} alert={vpinSignals.volumeAnomaly > 0.3} />
+                    <VPINStat label="Price Drift" value={`${(vpinSignals.priceDriftScore * 100).toFixed(0)}%`} alert={vpinSignals.priceDriftScore > 0.3} />
+                  </div>
+                  {vpinSignals.nAlertBuckets > 0 && (
+                    <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-orange))]">
+                      {vpinSignals.nAlertBuckets} alert bucket{vpinSignals.nAlertBuckets !== 1 ? "s" : ""} ({vpinSignals.alertPct.toFixed(0)}% of volume clock exceed threshold)
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          {vpinSignals && (
-            <div className="space-y-2 lg:space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Analysis</span>
-                <span className={cn(
-                  "text-[9px] lg:text-[11px] px-1.5 py-0.5 rounded font-label uppercase",
-                  vpinSignals.confidence === "high" ? "bg-[hsl(var(--dw-green))]/15 text-[hsl(var(--dw-green))]" :
-                  vpinSignals.confidence === "medium" ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
-                  "bg-muted text-muted-foreground"
-                )}>
-                  {vpinSignals.confidence} confidence ({vpinSignals.nTrades} trades)
-                </span>
-              </div>
-              <div className="grid grid-cols-3 lg:grid-cols-6 gap-1.5 lg:gap-2">
-                <VPINStat label="VPIN Now" value={`${(vpinSignals.vpinCurrent * 100).toFixed(0)}%`} alert={vpinSignals.vpinCurrent >= 0.4} />
-                <VPINStat label="VPIN Peak" value={`${(vpinSignals.vpinMax * 100).toFixed(0)}%`} alert={vpinSignals.vpinMax >= 0.5} />
-                <VPINStat label="VPIN Avg" value={`${(vpinSignals.vpinMean * 100).toFixed(0)}%`} />
-                <VPINStat label="Trend" value={vpinSignals.vpinTrend > 0 ? `+${(vpinSignals.vpinTrend * 100).toFixed(0)}%` : `${(vpinSignals.vpinTrend * 100).toFixed(0)}%`} alert={vpinSignals.vpinTrend > 0.2} />
-                <VPINStat label="Vol Anomaly" value={`${(vpinSignals.volumeAnomaly * 100).toFixed(0)}%`} alert={vpinSignals.volumeAnomaly > 0.3} />
-                <VPINStat label="Price Drift" value={`${(vpinSignals.priceDriftScore * 100).toFixed(0)}%`} alert={vpinSignals.priceDriftScore > 0.3} />
-              </div>
-              {vpinSignals.nAlertBuckets > 0 && (
-                <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-orange))]">
-                  {vpinSignals.nAlertBuckets} alert bucket{vpinSignals.nAlertBuckets !== 1 ? "s" : ""} ({vpinSignals.alertPct.toFixed(0)}% of volume clock exceed threshold)
+              {vpinFlags.length > 0 && (
+                <div className="space-y-1.5 lg:space-y-2">
+                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Detection Flags</span>
+                  {vpinFlags.map((flag, i) => (
+                    <div key={i} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
+                      <span className="truncate mr-2">{flag.name}</span>
+                      <span className={cn(
+                        "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
+                        flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
+                        flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
+                        "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
+                      )}>
+                        {flag.severity} +{flag.points}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 lg:gap-5">
+              <ScoreGauge score={score} size={80} lgSize={100} />
+              <div className="flex-1">
+                {tradesLoading ? (
+                  <div className="flex items-center gap-2 text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">
+                    <Activity className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                    Running VPIN analysis...
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="text-xs lg:text-sm font-mono-data text-muted-foreground">
+                      Preliminary activity score — expand with trade data for full VPIN analysis
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <VPINStat label="24h Volume" value={formatCurrency(vol24)} />
+                      {topPrice !== null && <VPINStat label={topOutcome} value={formatCents(topPrice)} />}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -208,43 +236,6 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
                   </span>
                 );
               })}
-            </div>
-          )}
-
-          {flags.length > 0 && (
-            <div className="space-y-1.5 lg:space-y-2">
-              <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">Detection Flags</span>
-              {flags.map((flag, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
-                  <span className="truncate mr-2">{flag.name}</span>
-                  <span className={cn(
-                    "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
-                    flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
-                    flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
-                    "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
-                  )}>
-                    {flag.severity} +{flag.points}
-                  </span>
-                </div>
-              ))}
-              {tradeFlags.length > 0 && (
-                <>
-                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground/60 uppercase mt-2">VPIN Detection Signals</span>
-                  {tradeFlags.map((flag, i) => (
-                    <div key={`tf-${i}`} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-dashed border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
-                      <span className="truncate mr-2">{flag.name}</span>
-                      <span className={cn(
-                        "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
-                        flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
-                        flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
-                        "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
-                      )}>
-                        {flag.severity} +{flag.points}
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
             </div>
           )}
 
@@ -331,17 +322,6 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="p-2 lg:p-4 bg-background/50 lg:bg-background rounded border border-border/50 lg:border-border">
-      <div className="flex items-center gap-1 lg:gap-1.5 text-[9px] lg:text-xs font-label text-muted-foreground uppercase mb-0.5 lg:mb-1">
-        {icon} {label}
-      </div>
-      <div className="font-mono-data text-xs lg:text-base lg:text-foreground">{value}</div>
     </div>
   );
 }

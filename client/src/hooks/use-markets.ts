@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { calculateMarketRisk, type MarketRiskProfile, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
+import { calculateActivityRank, type MarketRiskProfile } from "@/lib/scoring";
 
 export interface PolymarketData {
   id: string;
@@ -99,7 +99,7 @@ function useRawMarkets() {
   });
 }
 
-export function useMarkets(weights: ScoringWeights = DEFAULT_WEIGHTS) {
+export function useMarkets() {
   const query = useRawMarkets();
 
   const scoredMarkets = useMemo(() => {
@@ -108,10 +108,10 @@ export function useMarkets(weights: ScoringWeights = DEFAULT_WEIGHTS) {
     return query.data
       .map((raw): DarkWatchMarket => ({
         ...raw,
-        riskProfile: calculateMarketRisk(raw, weights),
+        riskProfile: calculateActivityRank(raw),
       }))
       .sort((a, b) => b.riskProfile.score - a.riskProfile.score);
-  }, [query.data, weights]);
+  }, [query.data]);
 
   return {
     ...query,

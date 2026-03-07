@@ -2,18 +2,14 @@ import { useState, useMemo } from "react";
 import { marked } from "marked";
 import { Header } from "@/components/Header";
 import { FeedCard } from "@/components/FeedCard";
-import { ScoringToggle, ScoringPanelBody } from "@/components/ScoringPanel";
 import { useMarkets } from "@/hooks/use-markets";
 import { useRecommend } from "@/hooks/use-recommend";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
-import { type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { AlertCircle, X, Sparkles, Terminal } from "lucide-react";
 
 export default function Dashboard() {
-  const [weights, setWeights] = useState<ScoringWeights>({ ...DEFAULT_WEIGHTS });
-  const [scoringOpen, setScoringOpen] = useState(false);
-  const { data: markets, isLoading, isError } = useMarkets(weights);
+  const { data: markets, isLoading, isError } = useMarkets();
   const [activeCategory, setActiveCategory] = useState<string | null>("politics");
   const [severityFilter, setSeverityFilter] = useState<"critical" | "high" | null>(null);
   const recommendMutation = useRecommend();
@@ -191,11 +187,6 @@ export default function Dashboard() {
                     </>
                   )}
                 </button>
-                <ScoringToggle
-                  isOpen={scoringOpen}
-                  isModified={Object.keys(DEFAULT_WEIGHTS).some(k => Math.abs(weights[k as keyof ScoringWeights] - DEFAULT_WEIGHTS[k as keyof ScoringWeights]) > 0.05)}
-                  onToggle={() => setScoringOpen(!scoringOpen)}
-                />
               </div>
 
               {recommendMutation.data && (
@@ -224,10 +215,6 @@ export default function Dashboard() {
                   {recommendMutation.error?.message || "Recommendation failed. Check connection."}
                 </div>
               )}
-
-              {scoringOpen && (
-                <ScoringPanelBody weights={weights} onChange={setWeights} />
-              )}
             </div>
           </div>
 
@@ -238,13 +225,13 @@ export default function Dashboard() {
               </div>
             ) : (
               filtered.map((market, i) => (
-                <FeedCard key={market.id} market={market} rank={i + 1} weights={weights} />
+                <FeedCard key={market.id} market={market} rank={i + 1} />
               ))
             )}
           </div>
 
           <div className="text-center py-4 lg:py-6 text-[10px] lg:text-sm font-label text-muted-foreground/50 lg:text-muted-foreground uppercase">
-            {filtered.length} markets monitored · refreshing every 30s
+            {filtered.length} markets monitored · VPIN model · refreshing every 30s
           </div>
         </div>
       )}
