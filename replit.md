@@ -31,17 +31,30 @@ Mobile-first web app that monitors Polymarket prediction markets for potential i
 - `shared/routes.ts` — API contract definitions
 
 ### Scoring Algorithm
-Markets scored 1-99 using continuous log-scaled scoring (weights configurable via UI 0x-2x):
-- **Volume Spike** — Log2-scaled spike ratio vs actual historical daily average (based on market age from `startDate`), absolute volume log10-scaled (up to 10 pts), weekly price momentum (up to 12 pts)
-- **Concentration** — Log10-scaled 24h/all-time volume ratio (up to 22 pts)
-- **Baseline Deviation** — Weekly deviation (vol24h vs 7-day daily avg, up to 18 pts), volume acceleration (weekly vs monthly avg, up to 12 pts), young market surge (markets <14 days old with high volume, up to 10 pts)
-- **Time Decay** — Trade recency analysis: volume concentration in recent quarter of window (up to 16 pts), activity surge ratio in last 2hrs vs 12hrs (up to 14 pts)
-- **Convergence** — Multi-signal convergence bonus scaled by flag count (up to 12 pts)
-- **Spread** — Bid-ask spread linearly scaled (up to 8 pts)
-- Trade enrichment (when expanded): one-sided order flow including fully-one-sided detection (up to 15 pts), trade clustering (up to 18 pts), large trades (up to 20 pts)
-- `smoothScale(value, low, high, maxPts)` provides truly continuous 0→maxPts interpolation (no step-function jumps)
-- Historical baseline uses market's actual age (`startDate` from Polymarket) instead of fixed 30-day assumption
-- Weekly/monthly volume data (`volume1wk`, `volume1mo`) from Polymarket used for baseline deviation detection
+Markets scored 1-99 using two-layer scoring:
+
+**Layer 1: Market Metadata Scoring** (`calculateMarketRisk()` in `scoring.ts`)
+- **Volume Spike** — Log2-scaled spike ratio vs daily avg, absolute volume, weekly price momentum
+- **Concentration** — Log10-scaled 24h/all-time volume ratio
+- **Baseline Deviation** — Weekly deviation, volume acceleration, young market surge
+- **Convergence** — Multi-signal convergence bonus
+- **Spread** — Bid-ask spread linearly scaled
+
+**Layer 2: VPIN Detection** (`enrichScoreWithTrades()` in `scoring.ts`, algorithms in `vpin.ts`)
+When trade data is loaded (card expanded), runs research-grade VPIN analysis:
+- **Bulk Volume Classification (BVC)** — Classifies each trade as buy/sell using normalized price change Z = ΔP/σ and normal CDF (Easley, López de Prado & O'Hara 2012)
+- **Volume Bucketing** — Groups trades into fixed-volume buckets (volume clock instead of time clock)
+- **Rolling VPIN** — Rolling average of order imbalance / total volume across bucket window
+- **Volume Anomaly** — Z-score based comparison of recent vs baseline volume, sigmoid mapped to [0,1]
+- **Price Drift** — Detects price drifting toward resolution boundary (0 or 1) faster than historical volatility would predict
+- **VPIN Trend** — Linear trend of VPIN series; positive = increasing informed trading
+- **Composite Score** — Weighted combination: VPIN current (25%), VPIN max (15%), VPIN trend (15%), volume anomaly (15%), price drift (15%), alert bucket % (10%)
+- Final score = 35% metadata base + 65% VPIN composite, mapped to 0-99 scale
+- VPIN signals generate detection flags: VPIN Elevated, Peak VPIN, VPIN Trend Rising, Volume Anomaly, Price Drift to Boundary, Alert Buckets
+- Confidence levels: high (500+ trades), medium (100+), low (<100)
+- Auto-tuned bucket size: total_volume / 300 (min 10)
+
+**Key Files**: `client/src/lib/vpin.ts` (VPIN pipeline port from Python), `client/src/lib/scoring.ts` (scoring + VPIN integration)
 
 ### Category System
 Markets classified into 5 categories using Polymarket's native event tags (mapped server-side in `routes.ts`):

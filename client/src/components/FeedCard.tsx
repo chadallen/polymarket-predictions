@@ -3,7 +3,7 @@ import { marked } from "marked";
 import { type DarkWatchMarket } from "@/hooks/use-markets";
 import { useTrades } from "@/hooks/use-trades";
 import { useAnalyze } from "@/hooks/use-analyze";
-import { enrichScoreWithTrades, type ScoringWeights, DEFAULT_WEIGHTS } from "@/lib/scoring";
+import { enrichScoreWithTrades, type ScoringWeights, type VPINSignals, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { formatCurrency, formatCents, cn, getScoreColor, getScoreBg } from "@/lib/utils";
 import { CATEGORIES } from "@/lib/categories";
@@ -21,15 +21,22 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
   const analyzeMutation = useAnalyze();
   const isMock = market.id.startsWith("mock-");
 
-  const score = market.riskProfile.score;
+  const baseScore = market.riskProfile.score;
   const flags = market.riskProfile.flags;
 
-  const tradeFlags = useMemo(() => {
-    if (!trades || trades.length === 0) return [];
-    const enriched = enrichScoreWithTrades(market.riskProfile, trades, weights);
-    return enriched.flags.filter(f => !market.riskProfile.flags.some(bf => bf.name === f.name));
+  const vpinEnriched = useMemo(() => {
+    if (!trades || trades.length === 0) return null;
+    return enrichScoreWithTrades(market.riskProfile, trades, weights);
   }, [market.riskProfile, trades, weights]);
 
+  const tradeFlags = useMemo(() => {
+    if (!vpinEnriched) return [];
+    return vpinEnriched.flags.filter(f => !market.riskProfile.flags.some(bf => bf.name === f.name));
+  }, [vpinEnriched, market.riskProfile]);
+
+  const vpinSignals: VPINSignals | undefined = vpinEnriched?.vpinSignals;
+
+  const score = vpinEnriched ? vpinEnriched.score : baseScore;
   const severityLabel = score >= 70 ? "CRITICAL" : score >= 62 ? "HIGH" : score >= 30 ? "MODERATE" : "LOW";
 
   const handleAnalyze = (e: React.MouseEvent) => {
@@ -161,6 +168,35 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
             </div>
           </div>
 
+          {vpinSignals && (
+            <div className="space-y-2 lg:space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Analysis</span>
+                <span className={cn(
+                  "text-[9px] lg:text-[11px] px-1.5 py-0.5 rounded font-label uppercase",
+                  vpinSignals.confidence === "high" ? "bg-[hsl(var(--dw-green))]/15 text-[hsl(var(--dw-green))]" :
+                  vpinSignals.confidence === "medium" ? "bg-[hsl(var(--dw-yellow))]/15 text-[hsl(var(--dw-yellow))]" :
+                  "bg-muted text-muted-foreground"
+                )}>
+                  {vpinSignals.confidence} confidence ({vpinSignals.nTrades} trades)
+                </span>
+              </div>
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-1.5 lg:gap-2">
+                <VPINStat label="VPIN Now" value={`${(vpinSignals.vpinCurrent * 100).toFixed(0)}%`} alert={vpinSignals.vpinCurrent >= 0.4} />
+                <VPINStat label="VPIN Peak" value={`${(vpinSignals.vpinMax * 100).toFixed(0)}%`} alert={vpinSignals.vpinMax >= 0.5} />
+                <VPINStat label="VPIN Avg" value={`${(vpinSignals.vpinMean * 100).toFixed(0)}%`} />
+                <VPINStat label="Trend" value={vpinSignals.vpinTrend > 0 ? `+${(vpinSignals.vpinTrend * 100).toFixed(0)}%` : `${(vpinSignals.vpinTrend * 100).toFixed(0)}%`} alert={vpinSignals.vpinTrend > 0.2} />
+                <VPINStat label="Vol Anomaly" value={`${(vpinSignals.volumeAnomaly * 100).toFixed(0)}%`} alert={vpinSignals.volumeAnomaly > 0.3} />
+                <VPINStat label="Price Drift" value={`${(vpinSignals.priceDriftScore * 100).toFixed(0)}%`} alert={vpinSignals.priceDriftScore > 0.3} />
+              </div>
+              {vpinSignals.nAlertBuckets > 0 && (
+                <div className="text-[10px] lg:text-xs font-mono-data text-[hsl(var(--dw-orange))]">
+                  {vpinSignals.nAlertBuckets} alert bucket{vpinSignals.nAlertBuckets !== 1 ? "s" : ""} ({vpinSignals.alertPct.toFixed(0)}% of volume clock exceed threshold)
+                </div>
+              )}
+            </div>
+          )}
+
           {topPrice !== null && (
             <div className="flex items-center gap-2 lg:gap-3 text-sm lg:text-base font-mono-data flex-wrap">
               <span className="text-muted-foreground text-xs lg:text-base">Outcomes:</span>
@@ -193,7 +229,7 @@ export function FeedCard({ market, rank, weights = DEFAULT_WEIGHTS }: FeedCardPr
               ))}
               {tradeFlags.length > 0 && (
                 <>
-                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground/60 uppercase mt-2">Trade-Level Signals</span>
+                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground/60 uppercase mt-2">VPIN Detection Signals</span>
                   {tradeFlags.map((flag, i) => (
                     <div key={`tf-${i}`} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-dashed border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
                       <span className="truncate mr-2">{flag.name}</span>
@@ -306,6 +342,23 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
         {icon} {label}
       </div>
       <div className="font-mono-data text-xs lg:text-base lg:text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function VPINStat({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+  return (
+    <div className={cn(
+      "p-1.5 lg:p-2.5 rounded border text-center",
+      alert
+        ? "border-[hsl(var(--dw-orange))]/30 bg-[hsl(var(--dw-orange))]/5"
+        : "border-border/50 bg-background/50"
+    )}>
+      <div className="text-[8px] lg:text-[10px] font-label text-muted-foreground uppercase mb-0.5">{label}</div>
+      <div className={cn(
+        "font-mono-data text-[11px] lg:text-sm font-semibold",
+        alert ? "text-[hsl(var(--dw-orange))]" : "text-foreground/80"
+      )}>{value}</div>
     </div>
   );
 }

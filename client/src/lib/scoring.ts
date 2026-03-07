@@ -1,3 +1,5 @@
+import { runVPINPipeline } from "./vpin";
+
 export interface DetectionFlag {
   name: string;
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
@@ -219,115 +221,117 @@ export function calculateMarketRisk(market: any, weights: ScoringWeights = DEFAU
   };
 }
 
+export interface VPINSignals {
+  vpinCurrent: number;
+  vpinMax: number;
+  vpinMean: number;
+  vpinTrend: number;
+  volumeAnomaly: number;
+  priceDriftScore: number;
+  nAlertBuckets: number;
+  alertPct: number;
+  overallScore: number;
+  nTrades: number;
+  confidence: "high" | "medium" | "low";
+}
+
 export function enrichScoreWithTrades(
   profile: MarketRiskProfile,
   trades: Array<{ price: number; size: number; side: string; timestamp: string }>,
   weights: ScoringWeights = DEFAULT_WEIGHTS
-): MarketRiskProfile {
+): MarketRiskProfile & { vpinSignals?: VPINSignals } {
   if (!trades || trades.length === 0) return profile;
 
-  let score = profile.score;
+  const vpinResult = runVPINPipeline(trades);
+
+  if (!vpinResult) return profile;
+
   const flags = [...profile.flags];
 
-  const buys = trades.filter(t => t.side === 'BUY');
-  const sells = trades.filter(t => t.side === 'SELL');
-  const totalTrades = buys.length + sells.length;
-  if (totalTrades > 0) {
-    let ratio: number;
-    if (buys.length === 0 || sells.length === 0) {
-      ratio = totalTrades;
-    } else {
-      ratio = Math.max(buys.length / sells.length, sells.length / buys.length);
-    }
-    if (ratio > 3) {
-      const pts = smoothScale(ratio, 3, 10, 15);
-      score += pts;
-      const dominant = buys.length > sells.length ? "BUY" : "SELL";
-      flags.push({ name: `One-Sided Flow (${ratio.toFixed(1)}:1 ${dominant})`, severity: ratio > 6 ? "CRITICAL" : "HIGH", points: Math.round(pts), category: "convergence" });
-    }
+  const vpinScore99 = Math.round(vpinResult.overallScore * 99);
+
+  if (vpinResult.vpinCurrent >= 0.4) {
+    const severity: DetectionFlag["severity"] = vpinResult.vpinCurrent >= 0.7 ? "CRITICAL" : vpinResult.vpinCurrent >= 0.5 ? "HIGH" : "MEDIUM";
+    const pts = Math.round(smoothScale(vpinResult.vpinCurrent, 0.3, 0.8, 25));
+    flags.push({
+      name: `VPIN Elevated (${(vpinResult.vpinCurrent * 100).toFixed(0)}% informed flow)`,
+      severity,
+      points: pts,
+      category: "convergence",
+    });
   }
 
-  if (trades.length >= 5) {
-    const sorted = [...trades].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-    for (let i = 0; i <= sorted.length - 5; i++) {
-      const span = new Date(sorted[i + 4].timestamp).getTime() - new Date(sorted[i].timestamp).getTime();
-      if (span < 3600000) {
-        const intensity = Math.max(1, 3600000 / Math.max(span, 1000));
-        const pts = smoothScale(intensity, 1, 60, 18);
-        score += pts;
-        flags.push({ name: "Trade Clustering (5+ trades in 1hr)", severity: "HIGH", points: Math.round(pts), category: "convergence" });
-        break;
-      }
-    }
+  if (vpinResult.vpinMax >= 0.5) {
+    const pts = Math.round(smoothScale(vpinResult.vpinMax, 0.4, 0.9, 20));
+    flags.push({
+      name: `Peak VPIN (${(vpinResult.vpinMax * 100).toFixed(0)}% max informed flow)`,
+      severity: vpinResult.vpinMax >= 0.75 ? "CRITICAL" : "HIGH",
+      points: pts,
+      category: "convergence",
+    });
   }
 
-  const sizes = trades.map(t => t.size);
-  const avgSize = sizes.reduce((a, b) => a + b, 0) / sizes.length;
-  const largeTrades = sizes.filter(s => s > avgSize * 5);
-  if (largeTrades.length > 0) {
-    const maxRatio = Math.max(...largeTrades) / avgSize;
-    const pts = smoothScale(maxRatio, 5, 50, 20);
-    score += pts;
-    flags.push({ name: `Large Trade(s) Detected (${largeTrades.length} @ >${Math.round(maxRatio)}x avg)`, severity: largeTrades.length >= 3 ? "CRITICAL" : "HIGH", points: Math.round(pts), category: "volumeSpike" });
+  if (vpinResult.vpinTrend > 0.2) {
+    const pts = Math.round(smoothScale(vpinResult.vpinTrend, 0.1, 0.8, 15));
+    flags.push({
+      name: `VPIN Trend Rising (+${(vpinResult.vpinTrend * 100).toFixed(0)}%)`,
+      severity: vpinResult.vpinTrend > 0.5 ? "HIGH" : "MEDIUM",
+      points: pts,
+      category: "convergence",
+    });
   }
 
-  const wTimeDecay = clampWeight(weights.timeDecay);
-  const now = Date.now();
-  const sorted = [...trades].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
-  if (sorted.length >= 3) {
-    const tradeTimestamps = sorted.map(t => new Date(t.timestamp).getTime());
-    const tradeSizes = sorted.map(t => t.size);
-    const oldestTrade = tradeTimestamps[0];
-    const newestTrade = tradeTimestamps[tradeTimestamps.length - 1];
-    const totalSpan = newestTrade - oldestTrade;
-
-    if (totalSpan > 0) {
-      const recentCutoff = newestTrade - totalSpan * 0.25;
-      let recentVolume = 0;
-      let totalVolume = 0;
-      for (let i = 0; i < tradeSizes.length; i++) {
-        totalVolume += tradeSizes[i];
-        if (tradeTimestamps[i] >= recentCutoff) {
-          recentVolume += tradeSizes[i];
-        }
-      }
-
-      const recentPct = totalVolume > 0 ? recentVolume / totalVolume : 0;
-      if (recentPct > 0.6) {
-        const pts = smoothScale(recentPct, 0.6, 0.95, 16) * wTimeDecay;
-        score += pts;
-        flags.push({
-          name: `Recency Spike (${(recentPct * 100).toFixed(0)}% volume in last quarter of window)`,
-          severity: recentPct > 0.85 ? "CRITICAL" : recentPct > 0.75 ? "HIGH" : "MEDIUM",
-          points: Math.round(pts),
-          category: "timeDecay",
-        });
-      }
-    }
-
-    const last2hr = tradeTimestamps.filter(t => now - t < 7200000).length;
-    const last12hr = tradeTimestamps.filter(t => now - t < 43200000).length;
-    if (last12hr > 0) {
-      const recencyRatio = last2hr / last12hr;
-      if (recencyRatio > 0.5 && last2hr >= 3) {
-        const pts = smoothScale(recencyRatio, 0.5, 0.95, 14) * wTimeDecay;
-        score += pts;
-        flags.push({
-          name: `Activity Surge (${last2hr}/${last12hr} trades in last 2hr)`,
-          severity: recencyRatio > 0.8 ? "HIGH" : "MEDIUM",
-          points: Math.round(pts),
-          category: "timeDecay",
-        });
-      }
-    }
+  if (vpinResult.volumeAnomaly > 0.3) {
+    const pts = Math.round(smoothScale(vpinResult.volumeAnomaly, 0.2, 0.8, 18));
+    flags.push({
+      name: `Volume Anomaly (z-score: ${(vpinResult.volumeAnomaly * 100).toFixed(0)}%)`,
+      severity: vpinResult.volumeAnomaly > 0.7 ? "CRITICAL" : vpinResult.volumeAnomaly > 0.5 ? "HIGH" : "MEDIUM",
+      points: pts,
+      category: "volumeSpike",
+    });
   }
 
-  score = Math.min(Math.max(score, 1), 99);
+  if (vpinResult.priceDriftScore > 0.3) {
+    const pts = Math.round(smoothScale(vpinResult.priceDriftScore, 0.2, 0.8, 18));
+    flags.push({
+      name: `Price Drift to Boundary (${(vpinResult.priceDriftScore * 100).toFixed(0)}% signal)`,
+      severity: vpinResult.priceDriftScore > 0.6 ? "HIGH" : "MEDIUM",
+      points: pts,
+      category: "convergence",
+    });
+  }
+
+  if (vpinResult.alertPct > 10) {
+    const pts = Math.round(smoothScale(vpinResult.alertPct, 5, 50, 15));
+    flags.push({
+      name: `${vpinResult.nAlertBuckets} Alert Buckets (${vpinResult.alertPct.toFixed(0)}% of volume clock)`,
+      severity: vpinResult.alertPct > 30 ? "CRITICAL" : vpinResult.alertPct > 15 ? "HIGH" : "MEDIUM",
+      points: pts,
+      category: "convergence",
+    });
+  }
+
+  const blendedScore = Math.round(
+    profile.score * 0.35 + vpinScore99 * 0.65
+  );
+  const finalScore = Math.min(Math.max(blendedScore, 1), 99);
 
   return {
     ...profile,
-    score: Math.round(score),
+    score: finalScore,
     flags: flags.sort((a, b) => b.points - a.points),
+    vpinSignals: {
+      vpinCurrent: vpinResult.vpinCurrent,
+      vpinMax: vpinResult.vpinMax,
+      vpinMean: vpinResult.vpinMean,
+      vpinTrend: vpinResult.vpinTrend,
+      volumeAnomaly: vpinResult.volumeAnomaly,
+      priceDriftScore: vpinResult.priceDriftScore,
+      nAlertBuckets: vpinResult.nAlertBuckets,
+      alertPct: vpinResult.alertPct,
+      overallScore: vpinResult.overallScore,
+      nTrades: vpinResult.nTrades,
+      confidence: vpinResult.confidence,
+    },
   };
 }
