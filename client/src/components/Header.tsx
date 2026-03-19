@@ -13,11 +13,11 @@ export function Header() {
     <header data-testid="header" className="sticky top-0 z-50 bg-background/95 lg:bg-background backdrop-blur border-b border-border px-4 py-3 lg:px-10 lg:py-5">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2 lg:gap-4">
-          <ShieldAlert className="w-4 h-4 lg:w-6 lg:h-6 text-[hsl(var(--dw-red))]" />
+          <ShieldAlert className="w-4 h-4 lg:w-6 lg:h-6 text-[hsl(var(--dw-orange))]" />
           <div>
             <h1 className="text-base lg:text-2xl font-bold font-mono-data tracking-tight leading-none">
-              <span className="text-foreground">DARK</span>
-              <span className="text-[hsl(var(--dw-orange))] text-glow-orange">WATCH</span>
+              <span className="text-foreground">Polymarket</span>
+              <span className="text-[hsl(var(--dw-orange))] text-glow-orange"> Predictions</span>
             </h1>
             <p className="text-[11px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase leading-none mt-0.5 lg:mt-1">detecting insider trades on prediction markets</p>
           </div>
