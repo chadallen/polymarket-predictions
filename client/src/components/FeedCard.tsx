@@ -53,6 +53,20 @@ export function FeedCard({ market, rank }: FeedCardProps) {
   const topPrice = market.outcomePrices?.[0] ? parseFloat(market.outcomePrices[0]) : null;
   const topOutcome = market.outcomes?.[0] || "Yes";
 
+  const scoreFactors = useMemo(() => {
+    const volTotal = parseFloat(market.volume || "0");
+    const vol1wk = parseFloat(market.volume1wk || "0");
+    const parsedStart = market.startDate ? new Date(market.startDate) : null;
+    const startDate = parsedStart && !isNaN(parsedStart.getTime()) ? parsedStart : null;
+    const marketAgeDays = startDate ? Math.max(1, (Date.now() - startDate.getTime()) / 86400000) : 30;
+    const avgDaily = volTotal > 0 ? volTotal / marketAgeDays : 0;
+    const spikeRatio = avgDaily > 0 ? vol24 / avgDaily : 0;
+    const weeklyDailyAvg = vol1wk > 0 ? vol1wk / 7 : 0;
+    const weekDeviation = weeklyDailyAvg > 0 ? vol24 / weeklyDailyAvg : 0;
+    const vol24Pct = volTotal > 0 ? (vol24 / volTotal) * 100 : 0;
+    return { spikeRatio, weekDeviation, vol24Pct, marketAgeDays, avgDaily };
+  }, [market, vol24]);
+
   return (
     <div
       data-testid={`feed-card-${market.id}`}
@@ -184,44 +198,107 @@ export function FeedCard({ market, rank }: FeedCardProps) {
 
               {vpinFlags.length > 0 && (
                 <div className="space-y-1.5 lg:space-y-2">
-                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Detection Flags</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">VPIN Detection Flags</span>
+                    <span className="text-[9px] lg:text-xs font-mono-data text-muted-foreground">
+                      {vpinFlags.reduce((s, f) => s + f.points, 0)} signal pts → score {score}/99
+                    </span>
+                  </div>
                   {vpinFlags.map((flag, i) => (
-                    <div key={i} className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 rounded bg-background/60 lg:bg-background border border-border/50 lg:border-border text-xs lg:text-base font-mono-data">
-                      <span className="truncate mr-2">{flag.name}</span>
-                      <span className={cn(
-                        "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
-                        flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
-                        flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
-                        "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
-                      )}>
-                        {flag.severity} +{flag.points}
-                      </span>
+                    <div key={i} className="rounded bg-background/60 lg:bg-background border border-border/50 lg:border-border overflow-hidden">
+                      <div className="flex items-center justify-between py-1.5 lg:py-2.5 px-2.5 lg:px-4 text-xs lg:text-base font-mono-data">
+                        <span className="truncate mr-2">{flag.name}</span>
+                        <span className={cn(
+                          "shrink-0 px-1.5 lg:px-2 py-0.5 rounded uppercase text-[9px] lg:text-[11px] tracking-wider",
+                          flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]/15 lg:bg-[hsl(var(--dw-red))]/30 text-[hsl(var(--dw-red))]" :
+                          flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]/15 lg:bg-[hsl(var(--dw-orange))]/30 text-[hsl(var(--dw-orange))]" :
+                          "bg-[hsl(var(--dw-yellow))]/15 lg:bg-[hsl(var(--dw-yellow))]/30 text-[hsl(var(--dw-yellow))]"
+                        )}>
+                          {flag.severity} +{flag.points}
+                        </span>
+                      </div>
+                      <div className="h-0.5 bg-border/30">
+                        <div
+                          className={cn(
+                            "h-full transition-all",
+                            flag.severity === "CRITICAL" ? "bg-[hsl(var(--dw-red))]" :
+                            flag.severity === "HIGH" ? "bg-[hsl(var(--dw-orange))]" :
+                            "bg-[hsl(var(--dw-yellow))]"
+                          )}
+                          style={{ width: `${Math.min(100, (flag.points / 25) * 100)}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-4 lg:gap-5">
-              <ScoreGauge score={score} size={80} lgSize={100} />
-              <div className="flex-1">
-                {tradesLoading ? (
-                  <div className="flex items-center gap-2 text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">
-                    <Activity className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                    Running VPIN analysis...
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    <div className="text-xs lg:text-sm font-mono-data text-muted-foreground">
-                      Preliminary activity score — expand with trade data for full VPIN analysis
+            <div className="space-y-3 lg:space-y-4">
+              <div className="flex items-center gap-4 lg:gap-5">
+                <ScoreGauge score={score} size={80} lgSize={100} />
+                <div className="flex-1">
+                  {tradesLoading ? (
+                    <div className="flex items-center gap-2 text-xs lg:text-sm font-mono-data text-muted-foreground animate-pulse">
+                      <Activity className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                      Running VPIN analysis...
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <VPINStat label="24h Volume" value={formatCurrency(vol24)} />
-                      {topPrice !== null && <VPINStat label={topOutcome} value={formatCents(topPrice)} />}
+                  ) : (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">Preliminary Score</span>
+                        <span className="text-[9px] lg:text-[11px] px-1.5 py-0.5 rounded font-label uppercase bg-muted text-muted-foreground">activity-based · trade data loading</span>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 lg:gap-2">
+                        <VPINStat label="24h Volume" value={formatCurrency(vol24)} />
+                        <VPINStat label="Daily Spike" value={`${scoreFactors.spikeRatio.toFixed(1)}×`} alert={scoreFactors.spikeRatio > 1.5} />
+                        <VPINStat label="Weekly Dev" value={`${scoreFactors.weekDeviation.toFixed(1)}×`} alert={scoreFactors.weekDeviation > 2} />
+                        <VPINStat label="Vol Conc." value={`${scoreFactors.vol24Pct.toFixed(1)}%`} alert={scoreFactors.vol24Pct > 10} />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
+
+              {!tradesLoading && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase">Score Factors</span>
+                  <div className="space-y-1 lg:space-y-1.5">
+                    <ScoreFactor
+                      label="Volume Spike vs 30-day avg"
+                      value={scoreFactors.spikeRatio}
+                      displayValue={`${scoreFactors.spikeRatio.toFixed(2)}×`}
+                      threshold={1.2}
+                      maxValue={10}
+                      maxPts={30}
+                    />
+                    <ScoreFactor
+                      label="24h Absolute Volume"
+                      value={vol24}
+                      displayValue={formatCurrency(vol24)}
+                      threshold={10000}
+                      maxValue={3000000}
+                      maxPts={15}
+                    />
+                    <ScoreFactor
+                      label="Volume Concentration (% of total)"
+                      value={scoreFactors.vol24Pct}
+                      displayValue={`${scoreFactors.vol24Pct.toFixed(1)}%`}
+                      threshold={5}
+                      maxValue={50}
+                      maxPts={25}
+                    />
+                    <ScoreFactor
+                      label="Weekly Deviation vs 7-day avg"
+                      value={scoreFactors.weekDeviation}
+                      displayValue={`${scoreFactors.weekDeviation.toFixed(2)}×`}
+                      threshold={2}
+                      maxValue={15}
+                      maxPts={20}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -339,6 +416,60 @@ function VPINStat({ label, value, alert = false }: { label: string; value: strin
         "font-mono-data text-[11px] lg:text-sm font-semibold",
         alert ? "text-[hsl(var(--dw-orange))]" : "text-foreground/80"
       )}>{value}</div>
+    </div>
+  );
+}
+
+function ScoreFactor({
+  label,
+  value,
+  displayValue,
+  threshold,
+  maxValue,
+  maxPts,
+}: {
+  label: string;
+  value: number;
+  displayValue: string;
+  threshold: number;
+  maxValue: number;
+  maxPts: number;
+}) {
+  const active = value > threshold;
+  const pct = active ? Math.min(100, ((value - threshold) / (maxValue - threshold)) * 100) : 0;
+  const pts = active ? Math.round((pct / 100) * maxPts) : 0;
+
+  return (
+    <div className={cn(
+      "px-2.5 lg:px-4 py-1.5 lg:py-2.5 rounded border overflow-hidden",
+      active ? "border-border bg-background/60 lg:bg-background" : "border-border/30 bg-background/20"
+    )}>
+      <div className="flex items-center justify-between mb-1 lg:mb-1.5">
+        <span className={cn("text-[10px] lg:text-xs font-mono-data", active ? "text-foreground/80" : "text-muted-foreground/50")}>
+          {label}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className={cn("text-[10px] lg:text-xs font-mono-data font-semibold", active ? "text-foreground" : "text-muted-foreground/40")}>
+            {displayValue}
+          </span>
+          {active && (
+            <span className="text-[9px] lg:text-[11px] font-label text-[hsl(var(--dw-orange))] bg-[hsl(var(--dw-orange))]/10 px-1 py-0.5 rounded">
+              +{pts}pts
+            </span>
+          )}
+          {!active && (
+            <span className="text-[9px] lg:text-[11px] font-label text-muted-foreground/30 px-1 py-0.5">
+              below threshold
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="h-0.5 lg:h-1 bg-border/30 rounded-full">
+        <div
+          className={cn("h-full rounded-full transition-all", active ? "bg-[hsl(var(--dw-orange))]" : "bg-border/20")}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
     </div>
   );
 }
