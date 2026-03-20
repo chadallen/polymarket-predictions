@@ -73,6 +73,41 @@ function mapTagsToCategories(tags: Array<{label: string; slug: string}>): string
   return categories.size > 0 ? Array.from(categories) : ["other"];
 }
 
+const AI_RATE_LIMIT = 10;
+const AI_RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+const aiRateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(req: any): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) {
+    return (typeof forwarded === "string" ? forwarded : forwarded[0]).split(",")[0].trim();
+  }
+  return req.ip || req.socket?.remoteAddress || "unknown";
+}
+
+function checkAIRateLimit(req: any, res: any): boolean {
+  const ip = getClientIp(req);
+  const now = Date.now();
+  const entry = aiRateLimitStore.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    aiRateLimitStore.set(ip, { count: 1, resetAt: now + AI_RATE_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= AI_RATE_LIMIT) {
+    const resetsIn = Math.ceil((entry.resetAt - now) / 1000 / 60 / 60);
+    res.status(429).json({
+      message: `Rate limit reached: ${AI_RATE_LIMIT} AI requests per 24 hours. Resets in ~${resetsIn}h.`,
+    });
+    return false;
+  }
+
+  entry.count += 1;
+  return true;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -172,6 +207,7 @@ export async function registerRoutes(
   });
 
   app.post(api.analyze.create.path, async (req, res) => {
+    if (!checkAIRateLimit(req, res)) return;
     try {
       const input = api.analyze.create.input.parse(req.body);
 
@@ -225,6 +261,7 @@ Reply in this exact format, be brief:
   });
 
   app.post(api.recommend.create.path, async (req, res) => {
+    if (!checkAIRateLimit(req, res)) return;
     try {
       const input = api.recommend.create.input.parse(req.body);
 
