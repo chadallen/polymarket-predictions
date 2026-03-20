@@ -291,12 +291,12 @@ export function FeedCard({ market, rank }: FeedCardProps) {
                 {analyzeMutation.isPending ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-3 h-3 lg:w-4 lg:h-4 border border-t-transparent border-[hsl(var(--dw-blue))] rounded-full animate-spin" />
-                    Analyzing...
+                    Finding trade...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <Terminal className="w-3 h-3 lg:w-5 lg:h-5" />
-                    AI Analysis
+                    Find the Trade
                   </span>
                 )}
               </button>
@@ -306,7 +306,7 @@ export function FeedCard({ market, rank }: FeedCardProps) {
           {analyzeMutation.data && (
             <div className="p-3 lg:p-5 rounded border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20">
               <div className="text-[10px] lg:text-sm font-label text-[hsl(var(--dw-blue))] uppercase mb-2 lg:mb-3 flex items-center gap-1.5">
-                <Terminal className="w-3 h-3 lg:w-4 lg:h-4" /> Claude Assessment
+                <Terminal className="w-3 h-3 lg:w-4 lg:h-4" /> Trade Signal
               </div>
               <div
                 className="text-xs lg:text-base leading-relaxed text-foreground/85 lg:text-foreground font-mono-data prose prose-invert prose-xs lg:prose-base max-w-none [&_p]:my-1 lg:[&_p]:my-2 [&_ul]:my-1 lg:[&_ul]:my-2 [&_ol]:my-1 lg:[&_ol]:my-2 [&_li]:my-0.5 lg:[&_li]:my-1 [&_strong]:text-foreground [&_hr]:border-border/30 lg:[&_hr]:border-border [&_hr]:my-2 lg:[&_hr]:my-3"

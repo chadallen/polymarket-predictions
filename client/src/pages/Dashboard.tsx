@@ -183,7 +183,7 @@ export default function Dashboard() {
                   ) : (
                     <>
                       <Sparkles className="w-3 h-3 lg:w-4 lg:h-4" />
-                      AI Recommendation
+                      Get Trade Signals
                     </>
                   )}
                 </button>
@@ -193,7 +193,7 @@ export default function Dashboard() {
                 <div data-testid="panel-ai-recommendation" className="border border-[hsl(var(--dw-blue))]/20 lg:border-[hsl(var(--dw-blue))] bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-[hsl(var(--dw-blue))]/20 rounded p-3 lg:p-5 max-h-[40vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-2 lg:mb-3 sticky top-0 bg-[hsl(var(--dw-blue))]/[0.03] lg:bg-transparent pb-1">
                     <div className="text-[10px] lg:text-sm font-label text-[hsl(var(--dw-blue))] uppercase flex items-center gap-1.5">
-                      <Terminal className="w-3 h-3 lg:w-4 lg:h-4" /> Intelligence Briefing
+                      <Terminal className="w-3 h-3 lg:w-4 lg:h-4" /> Top Trade Signals
                     </div>
                     <button
                       data-testid="button-close-recommendation"
@@ -215,6 +215,16 @@ export default function Dashboard() {
                   {recommendMutation.error?.message || "Recommendation failed. Check connection."}
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="px-3 lg:px-5 pt-3 lg:pt-5">
+            <div className="rounded border border-[hsl(var(--dw-orange))]/20 bg-[hsl(var(--dw-orange))]/[0.04] px-3 lg:px-5 py-2.5 lg:py-3 flex items-start gap-2.5 lg:gap-3">
+              <span className="text-[hsl(var(--dw-orange))] text-base lg:text-xl leading-none mt-0.5">→</span>
+              <p className="text-[11px] lg:text-sm font-mono-data text-muted-foreground leading-relaxed">
+                <span className="text-foreground/80 font-semibold">When insiders bet big on Polymarket, real markets follow.</span>
+                {" "}We surface unusual trading patterns before the news breaks — expand any market and hit <span className="text-[hsl(var(--dw-blue))]">Find the Trade</span> to get an AI-generated real-world trade recommendation.
+              </p>
             </div>
           </div>
 

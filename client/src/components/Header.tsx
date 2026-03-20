@@ -19,7 +19,7 @@ export function Header() {
               <span className="text-foreground">Polymarket</span>
               <span className="text-[hsl(var(--dw-orange))] text-glow-orange"> Predictions</span>
             </h1>
-            <p className="text-[11px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase leading-none mt-0.5 lg:mt-1">detecting insider trades on prediction markets</p>
+            <p className="text-[11px] lg:text-sm font-label lg:font-semibold text-muted-foreground uppercase leading-none mt-0.5 lg:mt-1">insider signals <span className="text-[hsl(var(--dw-orange))]">→</span> real-world trades</p>
           </div>
         </div>
 
