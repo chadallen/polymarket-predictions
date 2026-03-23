@@ -5,7 +5,6 @@ A real-time surveillance dashboard that monitors Polymarket prediction markets f
 > **Insider signals → real-world trades**
 
 ## What It Does
-
 Prediction markets often surface insider knowledge before it becomes public. When someone with non-public information bets heavily on a geopolitical outcome, election, or policy event, their trading leaves a detectable fingerprint in the order flow.
 
 This app:
